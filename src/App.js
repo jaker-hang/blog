@@ -7,7 +7,7 @@ import Home from "./pages/Home";
 import PostDetail from "./pages/PostDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Love from "./pages/Love";
+import LovePage from "./pages/LovePage";
 import MusicPlayer from "./pages/Music";
 import Travel from "./pages/Travel";
 import NotFound from "./pages/NotFound";
@@ -44,7 +44,8 @@ function App() {
         // 2. 更改透明度值来改变遮罩的浓淡：
         //    - 更透明（更亮）：rgba(31, 41, 55, 0.5)
         //    - 更不透明（更暗）：rgba(31, 41, 55, 0.95)
-        background: "linear-gradient(rgba(31, 41, 55, 0.8), rgba(31, 41, 55, 0.9)), url('/imgs/background.jpg')",
+        background:
+          "linear-gradient(rgba(31, 41, 55, 0.8), rgba(31, 41, 55, 0.9)), url('/imgs/background.jpg')",
         backgroundSize: "cover",
         backgroundAttachment: "fixed",
         backgroundPosition: "center",
@@ -56,11 +57,14 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/love" element={<Love />} />
+            <Route path="/lovePage" element={<LovePage />} />
             <Route path="/music" element={<MusicPlayer />} />
-                <Route path="/travel" element={<Travel />} />
+            <Route path="/travel" element={<Travel />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/post/:id" element={<PostDetail getPostById={getPostById} />} />
+            <Route
+              path="/post/:id"
+              element={<PostDetail getPostById={getPostById} />}
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
