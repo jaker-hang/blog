@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import BackToTop from "./components/common/BackToTop";
@@ -12,6 +12,36 @@ import MusicPlayer from "./pages/Music";
 import Travel from "./pages/Travel";
 import NotFound from "./pages/NotFound";
 import { postsData } from "./utils/data";
+
+// 创建一个包装组件来处理LovePage的全屏显示
+function FullScreenWrapper({ children }) {
+  const location = useLocation();
+  const isLovePage = location.pathname === '/lovePage';
+
+  return (
+    <div
+      className={isLovePage ? "" : "min-h-screen flex flex-col"}
+      style={isLovePage ? {} : {
+        background:
+          "linear-gradient(rgba(31, 41, 55, 0.8), rgba(31, 41, 55, 0.9)), url('/imgs/background.jpg')",
+        backgroundSize: "cover",
+        backgroundAttachment: "fixed",
+        backgroundPosition: "center",
+      }}
+    >
+      {isLovePage ? (
+        <div className="h-screen w-full overflow-hidden">{children}</div>
+      ) : (
+        <div className="flex flex-col min-h-screen">
+          <Navbar isScrolled={false} />
+          <main className="flex-grow pt-24 pb-16">{children}</main>
+          <Footer />
+          <BackToTop />
+        </div>
+      )}
+    </div>
+  );
+}
 
 function App() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -32,46 +62,21 @@ function App() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{
-        // 这里调整背景颜色的明暗
-        // rgba(31, 41, 55, 0.8) 中的 31, 41, 55 是灰色的 RGB 值，0.8 是透明度
-        // 调整方法：
-        // 1. 更改 RGB 值来改变灰色的明暗：
-        //    - 更亮的灰色示例：rgba(55, 65, 81, 0.8)
-        //    - 更暗的灰色示例：rgba(17, 24, 39, 0.8)
-        // 2. 更改透明度值来改变遮罩的浓淡：
-        //    - 更透明（更亮）：rgba(31, 41, 55, 0.5)
-        //    - 更不透明（更暗）：rgba(31, 41, 55, 0.95)
-        background:
-          "linear-gradient(rgba(31, 41, 55, 0.8), rgba(31, 41, 55, 0.9)), url('/imgs/background.jpg')",
-        backgroundSize: "cover",
-        backgroundAttachment: "fixed",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="flex flex-col min-h-screen">
-        <Navbar isScrolled={isScrolled} />
-        <main className="flex-grow pt-24 pb-16">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/lovePage" element={<LovePage />} />
-            <Route path="/music" element={<MusicPlayer />} />
-            <Route path="/travel" element={<Travel />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route
-              path="/post/:id"
-              element={<PostDetail getPostById={getPostById} />}
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        <Footer />
-        <BackToTop />
-      </div>
-    </div>
+    <FullScreenWrapper>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/lovePage" element={<LovePage />} />
+        <Route path="/music" element={<MusicPlayer />} />
+        <Route path="/travel" element={<Travel />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route
+          path="/post/:id"
+          element={<PostDetail getPostById={getPostById} />}
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </FullScreenWrapper>
   );
 }
 
