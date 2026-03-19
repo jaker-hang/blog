@@ -17,6 +17,17 @@ import { postsData } from "./utils/data";
 function FullScreenWrapper({ children }) {
   const location = useLocation();
   const isLovePage = location.pathname === '/lovePage';
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // 监听滚动事件，用于导航栏样式变化
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div
@@ -30,10 +41,16 @@ function FullScreenWrapper({ children }) {
       }}
     >
       {isLovePage ? (
-        <div className="h-screen w-full overflow-hidden">{children}</div>
+        <div className="h-screen w-full overflow-hidden relative">
+          {/* 为LovePage设置透明导航栏 */}
+          <div className="fixed top-0 left-0 right-0 z-50">
+            <Navbar isScrolled={isScrolled} transparent={true} />
+          </div>
+          <div className="pt-16 h-full">{children}</div> {/* 添加顶部填充以避免内容被导航栏遮挡 */}
+        </div>
       ) : (
         <div className="flex flex-col min-h-screen">
-          <Navbar isScrolled={false} />
+          <Navbar isScrolled={isScrolled} />
           <main className="flex-grow pt-24 pb-16">{children}</main>
           <Footer />
           <BackToTop />

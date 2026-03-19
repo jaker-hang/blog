@@ -35,6 +35,7 @@ body.dark.eco{ --glow-r1:6px; --glow-r2:14px; }
     max-width: 220px;
     word-break: break-word;
     text-align: center;
+    z-index: 10;
 }
 body.dark .msg{
     box-shadow:none;
@@ -94,7 +95,7 @@ body.dark .msg.locked{ filter:none; }
 }
 
 /* 爆炸动画（核心破碎效果） */
-.msg.burst{ animation: burst 1.4s cubic-bezier(.17,.6,.2,1) forwards; }
+.msg.burst{ animation: burst 1.4s cubic-bezier(.17,.6,.2,1) forwards; z-index: 20; }
 @keyframes burst{
     0%{ opacity:1; transform:translate(-50%,-50%) translate(var(--heart-x),var(--heart-y)) scale(1); filter:blur(0); }
     70%{ opacity:.9; transform:translate(-50%,-50%) translate(calc(var(--heart-x) + var(--bx)*0.7), calc(var(--heart-y) + var(--by)*0.7)) scale(.9) rotate(var(--rot)); filter:blur(.3px); }
@@ -108,19 +109,21 @@ body.dark .msg.locked{ filter:none; }
     color:rgba(255,105,180,.7); text-shadow:0 2px 10px rgba(255,105,180,.18);
     opacity:.0; pointer-events:none;
     animation:titleIn 1.2s ease 0.8s both;
+    z-index: 30;
 }
 body.dark .center-title{ color:rgba(255,160,200,.9); text-shadow:0 0 18px rgba(255,130,200,.35); }
 @keyframes titleIn{ from{opacity:0; transform:translate(-50%,-55%);} to{opacity:.95; transform:translate(-50%,-50%);} }
 
 .controls{ 
     position:absolute; 
-    inset: auto 12px 12px auto; 
+    right: 12px;
+    bottom: 12px;
     display:flex; 
     gap:10px; 
     align-items:center; 
     flex-wrap: wrap;
     justify-content: flex-end;
-    z-index: 100;
+    z-index: 1000;
 }
 .btn{
     padding:8px 12px; 
@@ -134,6 +137,7 @@ body.dark .center-title{ color:rgba(255,160,200,.9); text-shadow:0 0 18px rgba(2
     font-size: clamp(12px, 2.5vw, 14px);
     border: none;
     transition: all 0.3s ease;
+    z-index: 1001;
 }
 .btn:hover {
     transform: translateY(-2px);

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FaHome, FaUser, FaHeart, FaImage, FaMusic, FaEnvelope, FaBook, FaBars, FaTimes } from 'react-icons/fa';
 
-const Navbar = ({ isScrolled }) => {
+const Navbar = ({ isScrolled, transparent = false }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -18,9 +18,13 @@ const Navbar = ({ isScrolled }) => {
   return (
     <nav 
       className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/20 backdrop-blur-md py-3 shadow-lg border-b border-white/30' 
-          : 'bg-transparent py-6'
+        transparent
+          ? isScrolled 
+            ? 'bg-black/30 backdrop-blur-md py-2' 
+            : 'bg-transparent py-4'
+          : isScrolled 
+            ? 'bg-white/20 backdrop-blur-md py-3 shadow-lg border-b border-white/30' 
+            : 'bg-transparent py-6'
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">

@@ -346,8 +346,15 @@ const LovePage = () => {
           for you ♥
         </div>
       </div>
-      <div className="controls absolute right-4 bottom-4 md:right-6 md:bottom-6">
-        <button className="btn" id="replay" ref={replayBtnRef} onClick={handleReplay}>
+      {/* 修复按钮定位问题，确保按钮在右下角可见 */}
+      <div className="fixed right-6 bottom-6 z-50 md:right-6 md:bottom-6 z-[1000]">
+        <button 
+          className="btn z-[1001]" 
+          id="replay" 
+          ref={replayBtnRef} 
+          onClick={handleReplay}
+          style={{ zIndex: 1001 }}
+        >
           重放 / 切换背景
         </button>
       </div>
