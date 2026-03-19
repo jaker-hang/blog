@@ -10,7 +10,7 @@ const Navbar = ({ isScrolled, transparent = false }) => {
     { name: "首页", path: "/", icon: <FaHome />, color: "text-blue-400" },
     { name: "关于", path: "/about", icon: <FaUser />, color: "text-green-400" },
     { name: "love", path: "/lovePage", icon: <FaHeart />, color: "text-red-400" },
-    { name: "相册", path: "/travel", icon: <FaImage />, color: "text-yellow-400" },
+    { name: "成长", path: "/travel", icon: <FaImage />, color: "text-yellow-400" },
     { name: "音乐", path: "/music", icon: <FaMusic />, color: "text-purple-400" },
     { name: "联系", path: "/contact", icon: <FaEnvelope />, color: "text-pink-400" },
   ];

@@ -1,212 +1,531 @@
-import React, { useState } from "react";
-import { MapPin, Heart, X, Star } from "react-feather";
+import React, { useState, useEffect } from "react";
+import {
+  MapPin,
+  Heart,
+  X,
+  Calendar,
+  Clock,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
+} from "react-feather";
 
-const Travel = () => {
-  // 状态管理
+const GrowthTimeline = () => {
   const [activeCategory, setActiveCategory] = useState("all");
-  const [selectedImage, setSelectedImage] = useState(null); // 用于存储选中的图片
+  const [selectedMoment, setSelectedMoment] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0); // 轮播图当前索引
 
-  // 目的地数据
-  const destinations = [
+  // 成长记忆数据（每张照片可以有多张图）
+
+const growthMoments = [
     {
       id: 1,
-      name: "巴厘岛",
-      country: "印度尼西亚",
-      image: "https://picsum.photos/id/1036/600/400",
-      rating: 4.8,
-      category: "beach",
+      title: "永劫无间",
+      date: "2025.12.20",
+      location: "广东・深圳",
+      images: [
+        "/imgs/Growth/yjwj1.jpg",
+        "/imgs/Growth/yjwj2.jpg",
+        "/imgs/Growth/yjwj3.jpg",
+      ],
+      story:
+        "2025年12月20日，打卡深圳永劫无间周年庆现场，沉浸式感受游戏里的热血与热闹，和同好一起呐喊互动，解锁超多现场专属惊喜，氛围感直接拉满。",
+      reflection: "我身无拘，武道无穷",
+      category: "achievement",
+      mood: "⚔️ 热血",
     },
     {
       id: 2,
-      name: "京都",
-      country: "日本",
-      image: "https://picsum.photos/id/1037/600/400",
-      rating: 4.7,
-      category: "culture",
+      title: "登顶梧桐山",
+      date: "2025.11.22",
+      location: "广东・深圳",
+      images: [
+        "/imgs/Growth/wutong1.jpg",
+        "/imgs/Growth/wutong2.jpg",
+        "/imgs/Growth/wutong3.jpg",
+        "/imgs/Growth/wutong4.jpg",
+        "/imgs/Growth/wutong5.jpg",
+        "/imgs/Growth/wutong6.jpg",
+      ],
+      story:
+        "成功登顶深圳梧桐山，一路攀登虽有疲惫，还意外偶遇了野生山猪，既惊险又新奇。站在山顶俯瞰全城时，所有辛苦都格外值得。",
+      reflection: "每一步坚持，都能遇见不一样的惊喜",
+      category: "travel",
+      mood: "🌄 难忘",
     },
     {
       id: 3,
-      name: "瑞士阿尔卑斯",
-      country: "瑞士",
-      image: "https://picsum.photos/id/1039/600/400",
-      rating: 4.9,
-      category: "nature",
+      title: "首次挑战蛋炒饭",
+      date: "2025.10.07",
+      location: "广东・深圳",
+      images: [
+        "/imgs/Growth/egg1.jpg",
+        "/imgs/Growth/egg2.jpg",
+        "/imgs/Growth/egg3.jpg",
+        "/imgs/Growth/egg4.jpg",
+      ],
+      story:
+        "2025年10月7日，第一次亲手做了蛋炒饭。从热锅冷油到完美出锅，看着米粒金黄颗颗分明，香气扑鼻的那一刻，成就感满满！",
+      reflection: "人间烟火气，最抚凡人心，学会做饭是一种幸福",
+      category: "achievement",
+      mood: "🍳 开心",
     },
     {
       id: 4,
-      name: "马尔代夫",
-      country: "马尔代夫",
-      image: "https://picsum.photos/id/1040/600/400",
-      rating: 4.9,
-      category: "beach",
+      title: "厦门方特国庆之旅",
+      date: "2025.10.01",
+      location: "福建・厦门",
+      images: [
+        "/imgs/Growth/fangte1.jpg",
+        "/imgs/Growth/fangte2.jpg",
+        "/imgs/Growth/fangte3.jpg",
+      ],
+      story:
+        "国庆假期打卡厦门方特，在梦幻的乐园里尽情游玩，体验各种刺激项目和精彩演出，节日氛围拉满，度过了超欢乐的一天。",
+      reflection: "在欢乐与烟火中，好好享受假期的美好",
+      category: "travel",
+      mood: "🎆 尽兴",
     },
     {
       id: 5,
-      name: "巴塞罗那",
-      country: "西班牙",
-      image: "https://picsum.photos/id/1041/600/400",
-      rating: 4.6,
-      category: "city",
+      title: "登顶深圳阳台山",
+      date: "2025.09.08",
+      location: "广东・深圳",
+      images: ["/imgs/Growth/mountain1.jpg"],
+      story:
+        "成功登顶深圳阳台山，一路向上，吹着山顶的风，俯瞰城市风景，所有疲惫都在这一刻烟消云散。",
+      reflection: "坚持向上，总能看见更开阔的风景",
+      category: "travel",
+      mood: "⛰️ 舒畅",
     },
     {
       id: 6,
-      name: "圣托里尼",
-      country: "希腊",
-      image: "https://picsum.photos/id/1043/600/400",
-      rating: 4.8,
-      category: "beach",
+      title: "机甲合体",
+      date: "2025.02.17",
+      location: "广东・东莞",
+      images: [
+        "/imgs/Growth/machine1.jpg",
+        "/imgs/Growth/machine2.jpg",
+        "/imgs/Growth/machine3.jpg",
+      ],
+      story:
+        "耗时许久，终于亲手组装完成敖丙机甲，从零散零件到完整成型，每一步都充满专注与期待，成品亮相的瞬间成就感拉满。欢迎新成员加入",
+      reflection:
+        "用心打磨热爱，耐心终有回响，静下心专注一件事，快乐就藏在细节里",
+      category: "achievement",
+      mood: "⚙️ 成就感",
+    },
+    {
+      id: 7,
+      title: "攻陷长隆欢乐世界",
+      date: "2024.10.03",
+      location: "广东・广州",
+      images: [
+        "/imgs/Growth/changlong1.jpg",
+        "/imgs/Growth/changlong2.jpg",
+        "/imgs/Growth/changlong3.jpg",
+      ],
+      story:
+        "打卡了心心念念的广州长隆！从垂直跌落的刺激到超萌的动物世界，一整天的电量都被快乐充满了。看着身边一起尖叫的伙伴，突然觉得，所谓的幸福感，就是和一群有趣的人，把烦恼统统甩在身后。",
+      reflection: "生活需要偶尔的放肆与快乐",
+      category: "travel",
+      mood: "🎢 超嗨",
+    },
+    {
+      id: 8,
+      title: "第一次出COS",
+      date: "2024.10.01",
+      location: "广东·深圳",
+      images: [
+        "/imgs/Growth/manzhan1.jpg",
+        "/imgs/Growth/manzhan2.jpg",
+        "/imgs/Growth/manzhan3.jpg",
+      ],
+      story:
+        "第一次奔赴漫展现场，见到了超多超还原的 coser，和同好们一起交流、合影，沉浸式感受热爱的氛围。原来喜欢的角色真的能从屏幕里走到眼前，这种快乐真的太治愈了。",
+      reflection: "成长就是学会享受独处的时光",
+      category: "achievement",
+      mood: "✨ 开心",
+    },
+    {
+      id: 9,
+      title: "迎来新家庭成员",
+      date: "2024.09.07",
+      location: "广东・东莞",
+      images: [
+        "/imgs/Growth/cat1.jpg",
+        "/imgs/Growth/cat2.jpg",
+        "/imgs/Growth/cat3.jpg",
+        "/imgs/Growth/cat4.jpg",
+      ],
+      story:
+        "2024年9月7日，领养了一只银渐层小猫，从此家里多了一个毛茸茸的小伙伴。从小心翼翼靠近到慢慢黏人，每一天都被它的可爱治愈。",
+      reflection: "被小动物信任和依赖，是温柔又珍贵的幸福",
+      category: "family",
+      mood: "🐱 治愈",
+    },
+    {
+      id: 10,
+      title: "二次赴漫展之约",
+      date: "2024.05.01",
+      location: "广东・深圳",
+      images: [
+        "/imgs/Growth/cos1.jpg",
+        "/imgs/Growth/cos2.jpg",
+        "/imgs/Growth/cos3.jpg",
+        "/imgs/Growth/cos4.jpg",
+        "/imgs/Growth/cos5.jpg",
+      ],
+      story:
+        "五月再次奔赴漫展，时隔不久再逛漫展，已经轻车熟路，和志同道合的伙伴一起逛展台、拍 COS，尽情沉浸在这场属于二次元的狂欢里。",
+      reflection: "热爱从不降温，再见依旧心动",
+      category: "achievement",
+      mood: "💫 欢喜",
+    },
+    {
+      id: 11,
+      title: "第一次去漫展",
+      date: "2023.10.04",
+      location: "广东・深圳",
+      images: [
+        "/imgs/Growth/cosPlay1.jpg",
+        "/imgs/Growth/cosPlay2.jpg",
+        "/imgs/Growth/cosPlay3.jpg",
+        "/imgs/Growth/cosPlay4.jpg",
+        "/imgs/Growth/cosPlay5.jpg",
+        "/imgs/Growth/cosPlay6.jpg",
+        "/imgs/Growth/cosPlay7.jpg",
+        "/imgs/Growth/cosPlay8.jpg",
+        "/imgs/Growth/cosPlay9.jpg",
+      ],
+      story:
+        "第一次踏入漫展现场，见到了超多喜欢的角色和同好，和大家合影、交流，沉浸式感受二次元的热闹与热爱，整个人都被快乐包围。",
+      reflection: "勇敢奔赴热爱，就会遇见同频的人",
+      category: "achievement",
+      mood: "🎭 满足",
+    },
+    {
+      id: 12,
+      title: "武汉欢乐谷一日游",
+      date: "2022.10.03",
+      location: "湖北・武汉",
+      images: [
+        "/imgs/Growth/wuhan1.jpg",
+        "/imgs/Growth/wuhan2.jpg",
+        "/imgs/Growth/wuhan3.jpg",
+      ],
+      story:
+        "在武汉欢乐谷泡了一整天，玩遍刺激项目还泡在街机厅里，又和一群陌生人玩了狼人杀，一边紧张推理一边放声大笑，陌生的热闹也格外治愈。",
+      reflection: "快乐很简单，玩得尽兴就是最好的放松",
+      category: "travel",
+      mood: "🎮 畅快",
     },
   ];
 
-  // 筛选目的地
-  const filteredDestinations =
-    activeCategory === "all"
-      ? destinations
-      : destinations.filter((dest) => dest.category === activeCategory);
 
-  // 打开图片放大查看
-  const openImageModal = (image) => {
-    setSelectedImage(image);
+  // 当模态框打开时，禁止body滚动
+  useEffect(() => {
+    if (selectedMoment) {
+      document.body.style.overflow = "hidden";
+      setCurrentImageIndex(0); // 打开时重置索引
+    } else {
+      document.body.style.overflow = "auto"; // 修改为auto确保页面可以滚动
+    }
+
+    // 组件卸载时恢复滚动
+    return () => {
+      document.body.style.overflow = "auto"; // 修改为auto确保页面可以滚动
+    };
+  }, [selectedMoment]);
+
+  // 筛选记忆
+  const filteredMoments =
+    activeCategory === "all"
+      ? growthMoments
+      : growthMoments.filter((moment) => moment.category === activeCategory);
+
+  // 打开详情模态框
+  const openMomentModal = (moment) => {
+    setSelectedMoment(moment);
   };
 
-  // 关闭图片放大查看
-  const closeImageModal = () => {
-    setSelectedImage(null);
+  // 关闭模态框
+  const closeModal = () => {
+    setSelectedMoment(null);
+  };
+
+  // 轮播图切换
+  const nextImage = () => {
+    if (selectedMoment) {
+      setCurrentImageIndex((prev) =>
+        prev === selectedMoment.images.length - 1 ? 0 : prev + 1,
+      );
+    }
+  };
+
+  const prevImage = () => {
+    if (selectedMoment) {
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? selectedMoment.images.length - 1 : prev - 1,
+      );
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 font-sans">
-      {/* 图片放大模态框 */}
-      {selectedImage && (
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-800 font-sans">
+      {/* 详情模态框 - 带轮播图 */}
+      {selectedMoment && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
-          onClick={closeImageModal}
+          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-start justify-center overflow-y-auto"
+          onClick={closeModal}
         >
           <div
-            className="relative max-w-6xl max-h-full"
-            onClick={(e) => e.stopPropagation()} // 防止点击图片时关闭模态框
+            className="relative max-w-3xl w-full my-8 mx-4"
+            onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={selectedImage.image}
-              alt={selectedImage.name}
-              className="max-w-full max-h-full object-contain"
-            />
-            <button
-              className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-all"
-              onClick={closeImageModal}
-            >
-              <X className="h-6 w-6" />
-            </button>
-            <div className="absolute bottom-4 left-0 right-0 text-center text-white bg-black bg-opacity-50 py-2 mx-4 rounded">
-              <h3 className="text-xl font-bold">{selectedImage.name}</h3>
-              <p className="text-gray-300">{selectedImage.country}</p>
+            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+              {/* 轮播图区域 */}
+              <div className="relative h-80 bg-black">
+                <img
+                  src={selectedMoment.images[currentImageIndex]}
+                  alt={`${selectedMoment.title} - ${currentImageIndex + 1}`}
+                  className="w-full h-full object-contain"
+                />
+
+                {/* 关闭按钮 */}
+                <button
+                  className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-all backdrop-blur-sm z-10"
+                  onClick={closeModal}
+                >
+                  <X className="h-6 w-6" />
+                </button>
+
+                {/* 左右切换箭头 - 只有多张图片时才显示 */}
+                {selectedMoment.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75 transition-all"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75 transition-all"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                  </>
+                )}
+
+                {/* 图片计数指示器 */}
+                {selectedMoment.images.length > 1 && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+                    {selectedMoment.images.map((_, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          idx === currentImageIndex
+                            ? "bg-white w-4"
+                            : "bg-white/50"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 文字内容区域 */}
+              <div className="p-8 max-h-[calc(100vh-24rem)] overflow-y-auto">
+                <div className="flex items-center text-gray-500 text-sm mb-4">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  <span className="mr-4">{selectedMoment.date}</span>
+                  <MapPin className="h-4 w-4 mr-1" />
+                  <span>{selectedMoment.location}</span>
+                </div>
+
+                <h2 className="text-3xl font-bold mb-4">
+                  {selectedMoment.title}
+                </h2>
+
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                  <p className="text-gray-700 italic leading-relaxed">
+                    "{selectedMoment.story}"
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <BookOpen className="h-6 w-6 text-blue-500 flex-shrink-0" />
+                  <div>
+                    <span className="text-sm text-blue-600 font-medium">
+                      今日感悟
+                    </span>
+                    <p className="text-xl font-semibold text-gray-800 mt-1">
+                      {selectedMoment.reflection}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      此刻心情：{selectedMoment.mood}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 目的地部分 */}
-      <section id="destinations" className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">时空相册</h2>
-              <p className="text-gray-600 max-w-2xl">
-                每一张照片都是记录美好生活
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mt-6 md:mt-0">
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeCategory === "all"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                onClick={() => setActiveCategory("all")}
-              >
-                全部
-              </button>
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeCategory === "beach"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                onClick={() => setActiveCategory("beach")}
-              >
-                海滩
-              </button>
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeCategory === "culture"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                onClick={() => setActiveCategory("culture")}
-              >
-                文化
-              </button>
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeCategory === "nature"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                onClick={() => setActiveCategory("nature")}
-              >
-                自然
-              </button>
-              <button
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeCategory === "city"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-                onClick={() => setActiveCategory("city")}
-              >
-                城市
-              </button>
-            </div>
+      {/* 时间线主体部分 - 保持不变，但注意卡片点击传递的moment包含images数组 */}
+      <section className="py-20">
+        <div className="container mx-auto px-4 max-w-6xl">
+          {/* 头部 */}
+          <div className="text-center mb-16">
+            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              成长时间线
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              每一张照片都是一个故事，每一个故事都是一次成长
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredDestinations.map((destination) => (
-              <div
-                key={destination.id}
-                className="bg-white rounded-xl shadow-md overflow-hidden group hover:shadow-xl transition-shadow"
-              >
-                <div className="relative h-60 overflow-hidden">
-                  <img
-                    src={destination.image}
-                    alt={destination.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 cursor-pointer"
-                    onClick={() => openImageModal(destination)} // 点击图片打开模态框
-                  />
-                  <button className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors">
-                    <Heart className="h-5 w-5 text-gray-600" />
-                  </button>
-                  <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium">
-                    <MapPin className="h-3 w-3 mr-1 inline" />
-                    {destination.country}
-                  </div>
-                </div>
+          {/* 分类筛选 - 与之前相同 */}
+          <div className="flex flex-wrap justify-center gap-3 mb-16">
+            {/* ... 按钮代码保持不变 ... */}
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
+                activeCategory === "all"
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+              }`}
+              onClick={() => setActiveCategory("all")}
+            >
+              全部记忆
+            </button>
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
+                activeCategory === "travel"
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+              }`}
+              onClick={() => setActiveCategory("travel")}
+            >
+              旅行
+            </button>
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
+                activeCategory === "family"
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+              }`}
+              onClick={() => setActiveCategory("family")}
+            >
+              家人
+            </button>
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
+                activeCategory === "study"
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+              }`}
+              onClick={() => setActiveCategory("study")}
+            >
+              学习
+            </button>
+            {/* <button
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
+                activeCategory === "struggle"
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+              }`}
+              onClick={() => setActiveCategory("struggle")}
+            >
+              挣扎
+            </button> */}
+            <button
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
+                activeCategory === "achievement"
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
+                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+              }`}
+              onClick={() => setActiveCategory("achievement")}
+            >
+              成就
+            </button>
+          </div>
 
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold">{destination.name}</h3>
-                    <div className="flex items-center bg-blue-50 text-blue-600 px-2 py-1 rounded text-sm">
-                      <Star className="h-3 w-3 mr-1 fill-current" />
-                      <span>{destination.rating}</span>
+          {/* 时间线 - 卡片部分需要修改图片显示 */}
+          <div className="relative">
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-blue-400 to-purple-400 hidden md:block"></div>
+
+            <div className="space-y-12">
+              {filteredMoments.map((moment, index) => (
+                <div
+                  key={moment.id}
+                  className={`relative flex flex-col md:flex-row ${
+                    index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
+                  }`}
+                >
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-blue-500 rounded-full border-4 border-white shadow-lg z-10 hidden md:block"></div>
+
+                  <div
+                    className={`w-full md:w-5/12 ${index % 2 === 0 ? "md:pr-12" : "md:pl-12"}`}
+                  >
+                    <div
+                      className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer"
+                      onClick={() => openMomentModal(moment)}
+                    >
+                      <div className="relative h-56 overflow-hidden">
+                        {/* 卡片上显示第一张图片 */}
+                        <img
+                          src={moment.images[0]}
+                          alt={moment.title}
+                          className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                        />
+                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+                          <Clock className="h-3 w-3 inline mr-1" />
+                          {moment.date}
+                        </div>
+                        {/* 如果有多张图片，显示一个数量标记 */}
+                        {moment.images.length > 1 && (
+                          <div className="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm">
+                            {moment.images.length} 张照片
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-6">
+                        <div className="flex items-center text-gray-500 text-sm mb-2">
+                          <MapPin className="h-3 w-3 mr-1" />
+                          <span>{moment.location}</span>
+                        </div>
+
+                        <h3 className="text-xl font-bold mb-3 hover:text-blue-600 transition-colors">
+                          {moment.title}
+                        </h3>
+
+                        <p className="text-gray-600 mb-4 line-clamp-2">
+                          {moment.story}
+                        </p>
+
+                        <div className="flex items-center gap-2 text-sm">
+                          <Heart className="h-4 w-4 text-pink-500" />
+                          <span className="text-gray-700 font-medium">
+                            {moment.reflection}
+                          </span>
+                        </div>
+
+                        <div className="mt-4 text-right">
+                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 rounded-full text-sm">
+                            {moment.mood}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <p className="text-gray-600 mb-4">
-                    探索这个令人惊叹的目的地，体验独特的文化和美景
-                  </p>
+                  <div className="hidden md:block md:w-5/12"></div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -214,4 +533,4 @@ const Travel = () => {
   );
 };
 
-export default Travel;
+export default GrowthTimeline;
