@@ -2,8 +2,15 @@
 
 一个现代化、响应式的个人博客网站实现，基于 React 和 Tailwind CSS 构建，具有优雅的 UI 设计和流畅的用户体验。
 
-![项目预览](/imgs/Preview/preview1.png)
-![项目预览](/imgs/Preview/preview2.png)
+<div align="center">
+
+![项目预览](./public/imgs/Preview/preview1.png)
+![项目预览](./public/imgs/Preview/preview2.png)
+![项目预览](./public/imgs/Preview/preview3.png)
+![项目预览](./public/imgs/Preview/preview4.png)
+![项目预览](./public/imgs/Preview/preview5.png)
+
+</div>
 
 > 注意：以上图片仅在项目运行时可以正常显示。请执行 `npm start` 启动项目后查看。
 
@@ -14,9 +21,11 @@
 - [项目结构](#项目结构)
 - [安装和运行](#安装和运行)
 - [构建生产版本](#构建生产版本)
+- [页面功能介绍](#页面功能介绍)
 - [自定义配置](#自定义配置)
 - [图片替换指南](#图片替换指南)
 - [浏览器支持](#浏览器支持)
+- [贡献](#贡献)
 - [许可证](#许可证)
 
 ## 功能特点
@@ -25,17 +34,22 @@
 - 🖱️ **动态导航栏** - 滚动时自动调整样式
 - 🌟 **特色文章展示区** - 突出优质内容
 - 🃏 **文章卡片布局** - 带有精美的悬停动画效果
-- 🔖 **分类导航系统** - 方便内容浏览
+- 🔖 **分类导航系统** - 方便内容浏览（首页、关于、联系、旅行、音乐、爱情等）
 - 👤 **作者信息展示** - 包含社交链接
 - 📧 **邮件订阅功能** - 便于用户获取更新
 - 🚀 **平滑滚动** - 回到顶部功能
+- 🎵 **音乐播放器** - 集成黑胶唱片播放界面，带歌词同步显示
+- ✈️ **旅行页面** - 展示旅行相关内容
+- 💖 **爱情页面** - 特殊页面设计，提供沉浸式体验
+- 🎨 **现代化UI设计** - 采用毛玻璃效果、渐变色彩等设计元素
 
 ## 技术栈
 
 - **前端框架**: [React 19](https://reactjs.org/)
 - **路由管理**: [React Router v7](https://reactrouter.com/)
-- **样式解决方案**: [Tailwind CSS 3](https://tailwindcss.com/)
+- **样式解决方案**: [Tailwind CSS 3](https://tailwindcss.com/) + PostCSS + Autoprefixer
 - **构建工具**: [Create React App](https://create-react-app.dev/)
+- **图标库**: [React Feather](https://github.com/feathericons/react-feather)
 - **测试套件**: 
   - [@testing-library/react](https://testing-library.com/docs/react-testing-library/intro/)
   - [@testing-library/jest-dom](https://github.com/testing-library/jest-dom)
@@ -44,28 +58,52 @@
 ## 项目结构
 
 ```
-src/
-├── components/          # 可复用组件
-│   ├── layout/          # 布局组件
-│   │   ├── Navbar.jsx   # 导航栏
-│   │   ├── Footer.jsx   # 页脚
-│   │   └── Sidebar.jsx  # 侧边栏
-│   ├── posts/           # 文章相关组件
-│   │   ├── FeaturedPost.jsx  # 特色文章
-│   │   ├── PostCard.jsx      # 文章卡片
-│   │   └── PostList.jsx      # 文章列表
-│   └── common/          # 通用组件
-│       └── SubscribeForm.jsx # 订阅表单
-├── pages/               # 页面组件
-│   ├── Home.jsx         # 首页
-│   ├── PostDetail.jsx   # 文章详情页
-│   ├── About.jsx        # 关于页面
-│   ├── Contact.jsx      # 联系页面
-│   └── NotFound.jsx     # 404页面
-├── utils/               # 工具函数和数据
-│   └── data.js          # 静态数据
-├── App.js               # 根组件
-└── index.js             # 入口文件
+.
+├── public
+│   ├── index.html
+│   ├── manifest.json
+│   └── imgs/
+│       └── Preview/
+├── src
+│   ├── components
+│   │   ├── common
+│   │   │   ├── BackToTop.jsx
+│   │   │   └── SubscribeForm.jsx
+│   │   ├── layout
+│   │   │   ├── Footer.jsx
+│   │   │   ├── Navbar.jsx
+│   │   │   └── Sidebar.jsx
+│   │   └── posts
+│   │       ├── FeaturedPost.jsx
+│   │       ├── PostCard.jsx
+│   │       └── PostList.jsx
+│   ├── pages
+│   │   ├── About.jsx
+│   │   ├── Article.jsx
+│   │   ├── Contact.jsx
+│   │   ├── Home.jsx
+│   │   ├── LovePage.css
+│   │   ├── LovePage.jsx
+│   │   ├── Music.jsx
+│   │   ├── NotFound.jsx
+│   │   ├── PostDetail.jsx
+│   │   ├── Travel.jsx
+│   │   └── Music.jsx
+│   ├── utils
+│   │   └── data.js
+│   ├── App.css
+│   ├── App.js
+│   ├── App.test.js
+│   ├── index.css
+│   ├── index.js
+│   ├── reportWebVitals.js
+│   └── setupTests.js
+├── IMAGE_REPLACEMENT_GUIDE.md
+├── README.md
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+└── tailwind.config.js
 ```
 
 ## 安装和运行
@@ -73,7 +111,7 @@ src/
 1. 克隆项目到本地：
 
    ```bash
-   git clone <项目地址>
+   git clone https://github.com/your-username/my-blog.git
    ```
 
 2. 进入项目目录：
@@ -112,14 +150,26 @@ yarn build
 
 构建后的文件将位于 `build/` 目录中，可以部署到任何静态网站托管服务上。
 
+## 页面功能介绍
+
+- **首页 (Home)**: 展示特色文章和最新内容
+- **关于 (About)**: 个人介绍和技能展示
+- **联系 (Contact)**: 联系方式和留言表单
+- **旅行 (Travel)**: 旅行相关内容展示
+- **音乐 (Music)**: 集成音乐播放器，支持黑胶唱片播放界面、歌词同步等功能
+- **爱情 (LovePage)**: 特殊页面设计，提供沉浸式体验
+- **文章详情 (PostDetail)**: 文章详细内容展示
+- **404页面 (NotFound)**: 页面不存在时的友好提示
+
 ## 自定义配置
 
 | 配置文件 | 用途 |
 |---------|------|
 | [`tailwind.config.js`](tailwind.config.js) | Tailwind CSS 配置 |
 | [`postcss.config.js`](postcss.config.js) | PostCSS 配置 |
-| [`src/index.css`](src/index.css) | 全局样式 |
-| [`src/utils/data.js`](src/utils/data.js) | 静态数据 |
+| [`src/App.css`](src/App.css) | 应用全局样式 |
+| [`src/index.css`](src/index.css) | 入口全局样式 |
+| [`src/utils/data.js`](src/utils/data.js) | 静态数据配置 |
 
 ## 图片替换指南
 
@@ -127,6 +177,7 @@ yarn build
 2. 准备符合要求的图片文件
 3. 将图片文件放入 `public/imgs/` 目录中
 4. 替换同名文件以更新网站中的图片
+5. 对于音乐播放器中的专辑封面，请放入 `public/audio/` 目录中
 
 ## 浏览器支持
 
@@ -135,3 +186,20 @@ yarn build
 - Firefox (最新2个版本)
 - Safari (最新2个版本)
 - Edge (最新2个版本)
+
+## 贡献
+
+欢迎提交 issue 和 pull request 来帮助改进这个项目。对于重大更改，请先开 issue 讨论您想要改变的内容。
+
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
+
+## 许可证
+
+本项目采用 MIT 许可证。有关更多信息，请参阅 [LICENSE](LICENSE) 文件。
+
+---
+> 项目仍在持续开发和完善中，欢迎提出宝贵意见和建议！
