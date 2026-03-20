@@ -6,6 +6,8 @@
 
 爱心参考网站：https://love.burnham.xin/
 
+项目部署网站：https://www.netlify.com/
+
 <div align="center">
 
 ![项目预览](./public/imgs/Preview/preview1.png)
