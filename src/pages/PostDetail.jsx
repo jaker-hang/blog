@@ -44,7 +44,7 @@ const PostDetail = ({ getPostById }) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0B0F1C] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="relative">
             <div className="w-20 h-20 border-4 border-[#4FD1C5]/20 border-t-[#4FD1C5] rounded-full animate-spin"></div>
@@ -60,7 +60,7 @@ const PostDetail = ({ getPostById }) => {
 
   if (error || !post) {
     return (
-      <div className="min-h-screen bg-[#0B0F1C] flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="max-w-md mx-auto text-center">
           <div className="text-8xl mb-6 opacity-20">404</div>
           <h2 className="text-2xl font-bold text-white mb-4">文章未找到</h2>
@@ -78,35 +78,7 @@ const PostDetail = ({ getPostById }) => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B0F1C] text-white relative overflow-x-hidden">
-      {/* 科技网格背景 */}
-      <div className="fixed inset-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(#4FD1C5 1px, transparent 1px),
-            linear-gradient(90deg, #4FD1C5 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px'
-        }}></div>
-      </div>
-
-      {/* 浮动图标背景 */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {["⚛️", "📘", "▲", "🎨", "📦", "⚡"].map((icon, i) => (
-          <div
-            key={i}
-            className="absolute text-4xl opacity-5 animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${i * 0.5}s`,
-              animationDuration: `${10 + i * 2}s`
-            }}
-          >
-            {icon}
-          </div>
-        ))}
-      </div>
+    <div className="min-h-screen text-white relative overflow-x-hidden">
 
       <div className="relative z-10">
         {/* 顶部导航 */}
@@ -381,16 +353,8 @@ const PostDetail = ({ getPostById }) => {
         </footer>
       </div>
 
-      {/* 动画样式 */}
+      {/* 页面样式 */}
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-        }
-        .animate-float {
-          animation: float linear infinite;
-        }
-        
         /* 文章内容样式 */
         .article-content h2 {
           scroll-margin-top: 80px;

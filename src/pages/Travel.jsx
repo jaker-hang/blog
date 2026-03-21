@@ -14,6 +14,11 @@ const GrowthTimeline = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [selectedMoment, setSelectedMoment] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0); // 轮播图当前索引
+  const [isModalAnimating, setIsModalAnimating] = useState(false);
+  const [isModalClosing, setIsModalClosing] = useState(false);
+  const [flashCut, setFlashCut] = useState(false);
+  const [impactMomentId, setImpactMomentId] = useState(null);
+  const [slashBurst, setSlashBurst] = useState(false);
 
   // 成长记忆数据（每张照片可以有多张图）
 
@@ -246,12 +251,30 @@ const growthMoments = [
 
   // 打开详情模态框
   const openMomentModal = (moment) => {
-    setSelectedMoment(moment);
+    setImpactMomentId(moment.id);
+    setSlashBurst(true);
+    setIsModalClosing(false);
+    setIsModalAnimating(false);
+    setFlashCut(true);
+    setTimeout(() => {
+      setSelectedMoment(moment);
+      requestAnimationFrame(() => {
+        setIsModalAnimating(true);
+      });
+    }, 85);
+    setTimeout(() => setImpactMomentId(null), 220);
+    setTimeout(() => setSlashBurst(false), 260);
+    setTimeout(() => setFlashCut(false), 140);
   };
 
   // 关闭模态框
   const closeModal = () => {
-    setSelectedMoment(null);
+    setIsModalClosing(true);
+    setIsModalAnimating(false);
+    setTimeout(() => {
+      setSelectedMoment(null);
+      setIsModalClosing(false);
+    }, 180);
   };
 
   // 轮播图切换
@@ -272,18 +295,39 @@ const growthMoments = [
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white text-gray-800 font-sans">
+    <div className="min-h-screen text-white font-sans">
       {/* 详情模态框 - 带轮播图 */}
       {selectedMoment && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-start justify-center overflow-y-auto"
+          className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 ${
+            isModalAnimating && !isModalClosing ? "bg-black/80" : "bg-black/0"
+          }`}
           onClick={closeModal}
         >
           <div
-            className="relative max-w-3xl w-full my-8 mx-4"
+            className={`relative max-w-3xl w-full transition-all duration-200 ${
+              isModalAnimating && !isModalClosing
+                ? "opacity-100 scale-100 rotate-0"
+                : "opacity-0 scale-95 rotate-[-1.5deg]"
+            }`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl">
+            <div className={`absolute inset-0 pointer-events-none z-20 transition-opacity duration-150 ${
+              flashCut ? "opacity-100" : "opacity-0"
+            }`}>
+              <div className="absolute inset-0 bg-white/90 mix-blend-screen"></div>
+              <div className="absolute -left-10 top-0 h-full w-24 bg-red-500/70 skew-x-[-25deg] animate-cut-scan"></div>
+            </div>
+            <div className={`absolute -inset-1 bg-gradient-to-r from-red-500 to-red-800 transition-all duration-200 ${
+              isModalAnimating && !isModalClosing ? "opacity-60" : "opacity-0"
+            }`}></div>
+            <div className={`absolute -left-10 top-10 w-24 h-2 bg-white/70 skew-x-[-30deg] pointer-events-none ${
+              isModalAnimating && !isModalClosing ? "animate-cutline" : ""
+            }`}></div>
+            <div className={`absolute -right-12 bottom-14 w-28 h-2 bg-red-500/80 skew-x-[-30deg] pointer-events-none ${
+              isModalAnimating && !isModalClosing ? "animate-cutline animation-delay-120" : ""
+            }`}></div>
+            <div className="bg-[#111116] border border-red-500/40 rounded-2xl overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.65)]">
               {/* 轮播图区域 */}
               <div className="relative h-80 bg-black">
                 <img
@@ -294,7 +338,7 @@ const growthMoments = [
 
                 {/* 关闭按钮 */}
                 <button
-                  className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75 transition-all backdrop-blur-sm z-10"
+                  className="absolute top-4 right-4 text-white bg-black/60 rounded-full p-2 hover:bg-red-600/70 transition-all backdrop-blur-sm z-10 border border-red-400/50"
                   onClick={closeModal}
                 >
                   <X className="h-6 w-6" />
@@ -305,13 +349,13 @@ const growthMoments = [
                   <>
                     <button
                       onClick={prevImage}
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75 transition-all"
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/60 text-white rounded-full p-2 hover:bg-red-600/70 transition-all border border-red-400/40"
                     >
                       <ChevronLeft className="h-6 w-6" />
                     </button>
                     <button
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white rounded-full p-2 hover:bg-opacity-75 transition-all"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/60 text-white rounded-full p-2 hover:bg-red-600/70 transition-all border border-red-400/40"
                     >
                       <ChevronRight className="h-6 w-6" />
                     </button>
@@ -326,8 +370,8 @@ const growthMoments = [
                         key={idx}
                         className={`w-2 h-2 rounded-full transition-all ${
                           idx === currentImageIndex
-                            ? "bg-white w-4"
-                            : "bg-white/50"
+                            ? "bg-red-500 w-4"
+                            : "bg-white/40"
                         }`}
                       />
                     ))}
@@ -337,33 +381,33 @@ const growthMoments = [
 
               {/* 文字内容区域 */}
               <div className="p-8 max-h-[calc(100vh-24rem)] overflow-y-auto">
-                <div className="flex items-center text-gray-500 text-sm mb-4">
+                <div className="flex items-center text-gray-300 text-sm mb-4">
                   <Calendar className="h-4 w-4 mr-1" />
                   <span className="mr-4">{selectedMoment.date}</span>
                   <MapPin className="h-4 w-4 mr-1" />
                   <span>{selectedMoment.location}</span>
                 </div>
 
-                <h2 className="text-3xl font-bold mb-4">
+                <h2 className="text-3xl font-bold mb-4 text-white">
                   {selectedMoment.title}
                 </h2>
 
-                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-                  <p className="text-gray-700 italic leading-relaxed">
+                <div className="bg-black/40 border-l-4 border-red-500 p-4 mb-6">
+                  <p className="text-gray-200 italic leading-relaxed">
                     "{selectedMoment.story}"
                   </p>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <BookOpen className="h-6 w-6 text-blue-500 flex-shrink-0" />
+                  <BookOpen className="h-6 w-6 text-red-400 flex-shrink-0" />
                   <div>
-                    <span className="text-sm text-blue-600 font-medium">
+                    <span className="text-sm text-red-300 font-medium tracking-wider">
                       今日感悟
                     </span>
-                    <p className="text-xl font-semibold text-gray-800 mt-1">
+                    <p className="text-xl font-semibold text-white mt-1">
                       {selectedMoment.reflection}
                     </p>
-                    <p className="text-sm text-gray-500 mt-2">
+                    <p className="text-sm text-gray-300 mt-2">
                       此刻心情：{selectedMoment.mood}
                     </p>
                   </div>
@@ -377,12 +421,19 @@ const growthMoments = [
       {/* 时间线主体部分 - 保持不变，但注意卡片点击传递的moment包含images数组 */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-6xl">
+          {slashBurst && (
+            <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
+              <div className="absolute -left-24 top-1/2 w-64 h-3 bg-red-500/70 skew-x-[-30deg] animate-global-slash"></div>
+              <div className="absolute -left-40 top-[55%] w-56 h-2 bg-white/50 skew-x-[-30deg] animate-global-slash animation-delay-80"></div>
+              <div className="absolute -left-56 top-[48%] w-44 h-2 bg-red-400/60 skew-x-[-30deg] animate-global-slash animation-delay-120"></div>
+            </div>
+          )}
           {/* 头部 */}
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-red-400 to-red-700 bg-clip-text text-transparent tracking-wide">
               成长时间线
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               每一张照片都是一个故事，每一个故事都是一次成长
             </p>
           </div>
@@ -393,8 +444,8 @@ const growthMoments = [
             <button
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
                 activeCategory === "all"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+                  ? "bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg"
+                  : "bg-[#13131a] text-gray-200 hover:bg-red-900/30 border border-red-500/30 shadow-md"
               }`}
               onClick={() => setActiveCategory("all")}
             >
@@ -403,8 +454,8 @@ const growthMoments = [
             <button
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
                 activeCategory === "travel"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+                  ? "bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg"
+                  : "bg-[#13131a] text-gray-200 hover:bg-red-900/30 border border-red-500/30 shadow-md"
               }`}
               onClick={() => setActiveCategory("travel")}
             >
@@ -413,8 +464,8 @@ const growthMoments = [
             <button
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
                 activeCategory === "family"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+                  ? "bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg"
+                  : "bg-[#13131a] text-gray-200 hover:bg-red-900/30 border border-red-500/30 shadow-md"
               }`}
               onClick={() => setActiveCategory("family")}
             >
@@ -423,8 +474,8 @@ const growthMoments = [
             <button
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
                 activeCategory === "study"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+                  ? "bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg"
+                  : "bg-[#13131a] text-gray-200 hover:bg-red-900/30 border border-red-500/30 shadow-md"
               }`}
               onClick={() => setActiveCategory("study")}
             >
@@ -433,8 +484,8 @@ const growthMoments = [
             {/* <button
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
                 activeCategory === "struggle"
-                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg"
-                  : "bg-white text-gray-700 hover:bg-gray-100 shadow-md"
+                  ? "bg-gradient-to-r from-red-500 to-red-700 text-white shadow-lg"
+                  : "bg-[#13131a] text-gray-200 hover:bg-red-900/30 border border-red-500/30 shadow-md"
               }`}
               onClick={() => setActiveCategory("struggle")}
             >
@@ -454,7 +505,7 @@ const growthMoments = [
 
           {/* 时间线 - 卡片部分需要修改图片显示 */}
           <div className="relative">
-            <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-blue-400 to-purple-400 hidden md:block"></div>
+            <div className="absolute left-1/2 transform -translate-x-1/2 w-0.5 h-full bg-gradient-to-b from-red-400 to-red-700 hidden md:block"></div>
 
             <div className="space-y-12">
               {filteredMoments.map((moment, index) => (
@@ -464,15 +515,24 @@ const growthMoments = [
                     index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"
                   }`}
                 >
-                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-blue-500 rounded-full border-4 border-white shadow-lg z-10 hidden md:block"></div>
+                  <div className="absolute left-1/2 transform -translate-x-1/2 w-4 h-4 bg-red-500 rounded-full border-4 border-black shadow-lg z-10 hidden md:block"></div>
 
                   <div
                     className={`w-full md:w-5/12 ${index % 2 === 0 ? "md:pr-12" : "md:pl-12"}`}
                   >
                     <div
-                      className="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer"
+                      className={`bg-[#111116]/95 border border-red-500/35 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)] cursor-pointer ${
+                        impactMomentId === moment.id ? "animate-card-impact" : ""
+                      }`}
                       onClick={() => openMomentModal(moment)}
                     >
+                      <div
+                        className={`pointer-events-none absolute inset-0 z-10 ${
+                          impactMomentId === moment.id ? "animate-card-echo" : "opacity-0"
+                        }`}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/45 to-transparent skew-x-[-28deg] translate-x-[-120%]"></div>
+                      </div>
                       <div className="relative h-56 overflow-hidden">
                         {/* 卡片上显示第一张图片 */}
                         <img
@@ -480,41 +540,41 @@ const growthMoments = [
                           alt={moment.title}
                           className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
                         />
-                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium shadow-lg">
+                        <div className="absolute top-4 right-4 bg-black/60 border border-red-400/50 text-white backdrop-blur-sm px-3 py-1 rounded-full text-sm font-medium shadow-lg">
                           <Clock className="h-3 w-3 inline mr-1" />
                           {moment.date}
                         </div>
                         {/* 如果有多张图片，显示一个数量标记 */}
                         {moment.images.length > 1 && (
-                          <div className="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm">
+                          <div className="absolute bottom-4 right-4 bg-black/70 border border-red-400/40 text-white px-2 py-1 rounded-full text-xs backdrop-blur-sm">
                             {moment.images.length} 张照片
                           </div>
                         )}
                       </div>
 
                       <div className="p-6">
-                        <div className="flex items-center text-gray-500 text-sm mb-2">
+                        <div className="flex items-center text-gray-300 text-sm mb-2">
                           <MapPin className="h-3 w-3 mr-1" />
                           <span>{moment.location}</span>
                         </div>
 
-                        <h3 className="text-xl font-bold mb-3 hover:text-blue-600 transition-colors">
+                        <h3 className="text-xl font-bold text-white mb-3 hover:text-red-400 transition-colors">
                           {moment.title}
                         </h3>
 
-                        <p className="text-gray-600 mb-4 line-clamp-2">
+                        <p className="text-gray-300 mb-4 line-clamp-2">
                           {moment.story}
                         </p>
 
                         <div className="flex items-center gap-2 text-sm">
-                          <Heart className="h-4 w-4 text-pink-500" />
-                          <span className="text-gray-700 font-medium">
+                          <Heart className="h-4 w-4 text-red-400" />
+                          <span className="text-gray-200 font-medium">
                             {moment.reflection}
                           </span>
                         </div>
 
                         <div className="mt-4 text-right">
-                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 rounded-full text-sm">
+                          <span className="inline-block px-3 py-1 bg-gradient-to-r from-red-900/50 to-red-700/50 border border-red-500/40 text-red-200 rounded-full text-sm">
                             {moment.mood}
                           </span>
                         </div>
@@ -529,6 +589,53 @@ const growthMoments = [
           </div>
         </div>
       </section>
+      <style jsx>{`
+        @keyframes cut-scan {
+          0% { transform: translateX(-40px) skewX(-25deg); opacity: 0.9; }
+          100% { transform: translateX(860px) skewX(-25deg); opacity: 0; }
+        }
+        .animate-cut-scan {
+          animation: cut-scan 180ms ease-out forwards;
+        }
+        @keyframes cutline {
+          0% { transform: translateX(0) skewX(-30deg); opacity: 0; }
+          40% { opacity: 1; }
+          100% { transform: translateX(18px) skewX(-30deg); opacity: 0; }
+        }
+        .animate-cutline {
+          animation: cutline 320ms ease-out;
+        }
+        .animation-delay-120 {
+          animation-delay: 120ms;
+        }
+        .animation-delay-80 {
+          animation-delay: 80ms;
+        }
+        @keyframes card-impact {
+          0% { transform: scale(1) rotate(0deg); }
+          35% { transform: scale(0.97) rotate(-0.35deg); }
+          70% { transform: scale(1.02) rotate(0.25deg); }
+          100% { transform: scale(1) rotate(0deg); }
+        }
+        .animate-card-impact {
+          animation: card-impact 220ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        @keyframes card-echo {
+          0% { opacity: 0; }
+          15% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        .animate-card-echo {
+          animation: card-echo 260ms ease-out;
+        }
+        @keyframes global-slash {
+          0% { transform: translateX(0) skewX(-30deg); opacity: 0.95; }
+          100% { transform: translateX(150vw) skewX(-30deg); opacity: 0; }
+        }
+        .animate-global-slash {
+          animation: global-slash 260ms ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };

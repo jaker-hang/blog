@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import BackToTop from "./components/common/BackToTop";
+import P5MapBackground from "./components/common/P5MapBackground";
 import Home from "./pages/Home";
 import PostDetail from "./pages/PostDetail";
 import About from "./pages/About";
@@ -32,13 +33,7 @@ function FullScreenWrapper({ children }) {
   return (
     <div
       className={isLovePage ? "" : "min-h-screen flex flex-col"}
-      style={isLovePage ? {} : {
-        background:
-          "linear-gradient(rgba(31, 41, 55, 0.8), rgba(31, 41, 55, 0.9)), url('/imgs/background.jpg')",
-        backgroundSize: "cover",
-        backgroundAttachment: "fixed",
-        backgroundPosition: "center",
-      }}
+      style={isLovePage ? {} : undefined}
     >
       {isLovePage ? (
         <div className="h-screen w-full overflow-hidden relative">
@@ -49,9 +44,10 @@ function FullScreenWrapper({ children }) {
           <div className="pt-16 h-full">{children}</div> {/* 添加顶部填充以避免内容被导航栏遮挡 */}
         </div>
       ) : (
-        <div className="flex flex-col min-h-screen">
+        <div className="relative flex flex-col min-h-screen app-main-bg p5-theme">
+          <P5MapBackground />
           <Navbar isScrolled={isScrolled} />
-          <main className="flex-grow pt-24 pb-16">{children}</main>
+          <main className="relative z-10 flex-grow pt-24 pb-16">{children}</main>
           <Footer />
           <BackToTop />
         </div>
@@ -61,18 +57,6 @@ function FullScreenWrapper({ children }) {
 }
 
 function App() {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // 监听滚动事件，用于导航栏样式变化
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   // 获取单篇文章数据
   const getPostById = (id) => {
     return postsData.find((post) => post.id === parseInt(id));

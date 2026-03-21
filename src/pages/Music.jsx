@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Share2, List, X, Repeat, Shuffle } from 'react-feather';
 
+// 同一个 HTMLMediaElement 只能创建一次 MediaElementSourceNode（避免重复创建报错）
+const mediaSourceRegistry = new WeakMap();
+
 const MusicPlayer = () => {
   // 状态管理
   const [isPlaying, setIsPlaying] = useState(false);
@@ -13,18 +16,17 @@ const MusicPlayer = () => {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [playMode, setPlayMode] = useState('loop');
+  const [lyricShiftY, setLyricShiftY] = useState(0);
 
   // 引用
   const audioRef = useRef(null);
-  const lyricsContainerRef = useRef(null);
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const sourceRef = useRef(null);
   const needleRef = useRef(null);
-  const isUserScrollingRef = useRef(false);
-  const scrollTimeoutRef = useRef(null);
+  const prevLyricIndexRef = useRef(-1);
 
   // 音乐列表数据
   const songs = useMemo(() => [
@@ -373,26 +375,58 @@ const MusicPlayer = () => {
     const audio = audioRef.current;
     const canvas = canvasRef.current;
     if (!audio || !canvas || !isPlaying) return;
-    
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+
+    let ctx = audioContextRef.current;
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      audioContextRef.current = ctx;
     }
-    
-    if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume();
+
+    // 优先复用已经创建过的 source（避免 createMediaElementSource 重复调用）
+    const existingSource = sourceRef.current || mediaSourceRegistry.get(audio);
+    if (existingSource) {
+      sourceRef.current = existingSource;
+      if (existingSource.context && ctx !== existingSource.context) {
+        ctx = existingSource.context;
+        audioContextRef.current = ctx;
+      }
     }
-    
-    if (!analyserRef.current) {
-      analyserRef.current = audioContextRef.current.createAnalyser();
+
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+
+    if (!analyserRef.current || analyserRef.current.context !== ctx) {
+      analyserRef.current = ctx.createAnalyser();
       analyserRef.current.fftSize = 256;
       analyserRef.current.smoothingTimeConstant = 0.8;
     }
-    
+
     if (!sourceRef.current) {
-      sourceRef.current = audioContextRef.current.createMediaElementSource(audio);
-      sourceRef.current.connect(analyserRef.current);
-      analyserRef.current.connect(audioContextRef.current.destination);
+      try {
+        sourceRef.current = ctx.createMediaElementSource(audio);
+        mediaSourceRegistry.set(audio, sourceRef.current);
+      } catch (error) {
+        // 遇到重复绑定异常时尝试从注册表恢复
+        const reused = mediaSourceRegistry.get(audio);
+        if (!reused) {
+          console.error("创建音频源失败:", error);
+          return;
+        }
+        sourceRef.current = reused;
+      }
     }
+
+    // 每次可视化初始化时安全重连，避免重复 connect 叠加
+    try {
+      sourceRef.current.disconnect();
+    } catch (e) {}
+    try {
+      analyserRef.current.disconnect();
+    } catch (e) {}
+
+    sourceRef.current.connect(analyserRef.current);
+    analyserRef.current.connect(ctx.destination);
     
     const bufferLength = analyserRef.current.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
@@ -435,24 +469,7 @@ const MusicPlayer = () => {
   }, [isPlaying, currentSong, songs]);
 
   // 处理用户开始滚动
-  const handleScrollStart = () => {
-    isUserScrollingRef.current = true;
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-  };
-
-  // 处理用户结束滚动
-  const handleScrollEnd = () => {
-    if (scrollTimeoutRef.current) {
-      clearTimeout(scrollTimeoutRef.current);
-    }
-    scrollTimeoutRef.current = setTimeout(() => {
-      isUserScrollingRef.current = false;
-    }, 1500);
-  };
-
-  // 歌词滚动 - 修复版
+  // 歌词高亮索引
   useEffect(() => {
     const currentLyrics = songs[currentSong]?.lyrics;
     if (!currentLyrics?.length) return;
@@ -479,79 +496,56 @@ const MusicPlayer = () => {
       newIndex = currentLyrics.length - 1;
     }
     
-    // 更新索引
     if (newIndex !== currentLyricIndex) {
       setCurrentLyricIndex(newIndex);
     }
-    
-    // 自动滚动歌词（仅在用户没有手动滚动时）
-    const container = lyricsContainerRef.current;
-    if (!container || newIndex === -1 || isUserScrollingRef.current) return;
-    
-    // 获取当前歌词元素
-    const activeLyric = container.children[newIndex];
-    
-    if (activeLyric) {
-      const containerHeight = container.clientHeight;
-      const lyricTop = activeLyric.offsetTop;
-      const lyricHeight = activeLyric.offsetHeight;
-      
-      // 计算理想滚动位置（让当前歌词居中）
-      const targetScroll = lyricTop - containerHeight / 2 + lyricHeight / 2;
-      
-      // 限制滚动范围
-      const maxScroll = container.scrollHeight - containerHeight;
-      const finalScroll = Math.max(0, Math.min(targetScroll, maxScroll));
-      
-      // 使用 requestAnimationFrame 避免频繁滚动
-      requestAnimationFrame(() => {
-        if (!isUserScrollingRef.current) {
-          container.scrollTo({
-            top: finalScroll,
-            behavior: 'smooth'
-          });
-        }
-      });
-    }
   }, [currentTime, currentSong, songs, currentLyricIndex]);
 
-  // 监听滚动容器的事件
-  useEffect(() => {
-    const container = lyricsContainerRef.current;
-    if (!container) return;
-    
-    const handleWheel = () => handleScrollStart();
-    const handleTouchStart = () => handleScrollStart();
-    const handleTouchEnd = () => handleScrollEnd();
-    
-    container.addEventListener('wheel', handleWheel, { passive: true });
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
-    container.addEventListener('touchend', handleTouchEnd);
-    container.addEventListener('scroll', handleScrollStart);
-    
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchend', handleTouchEnd);
-      container.removeEventListener('scroll', handleScrollStart);
-      
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  // 切换歌曲时重置滚动
+  // 切换歌曲时重置当前歌词
   useEffect(() => {
     setCurrentLyricIndex(-1);
-    
-    if (lyricsContainerRef.current) {
-      lyricsContainerRef.current.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
   }, [currentSong]);
+
+  // 固定5行歌词窗口，当前播放句在第3行
+  const lyricWindow = useMemo(() => {
+    const lyrics = songs[currentSong]?.lyrics || [];
+    if (!lyrics.length) return Array(5).fill(null);
+
+    const centerIndex = Math.max(0, currentLyricIndex);
+    const start = centerIndex - 2;
+
+    return Array.from({ length: 5 }, (_, i) => {
+      const actualIndex = start + i;
+      if (actualIndex < 0 || actualIndex >= lyrics.length) {
+        return { text: "", isCurrent: false, key: `empty-${i}` };
+      }
+      return {
+        text: lyrics[actualIndex].text,
+        isCurrent: actualIndex === currentLyricIndex,
+        key: `line-${actualIndex}`,
+      };
+    });
+  }, [songs, currentSong, currentLyricIndex]);
+
+  // 歌词切换增加轻微缓动，减少“生硬跳变”
+  useEffect(() => {
+    if (currentLyricIndex < 0) return;
+    const prev = prevLyricIndexRef.current;
+    if (prev === -1 || prev === currentLyricIndex) {
+      prevLyricIndexRef.current = currentLyricIndex;
+      return;
+    }
+
+    const direction = currentLyricIndex > prev ? 1 : -1;
+    setLyricShiftY(direction * 12);
+
+    const raf = requestAnimationFrame(() => {
+      setLyricShiftY(0);
+    });
+
+    prevLyricIndexRef.current = currentLyricIndex;
+    return () => cancelAnimationFrame(raf);
+  }, [currentLyricIndex]);
 
   // 调整canvas大小
   useEffect(() => {
@@ -573,10 +567,14 @@ const MusicPlayer = () => {
 
   // 组件卸载时清理
   useEffect(() => {
+    const audioEl = audioRef.current;
     return () => {
       cleanupAudio();
       if (audioContextRef.current) {
         audioContextRef.current.close();
+      }
+      if (audioEl) {
+        mediaSourceRegistry.delete(audioEl);
       }
     };
   }, [cleanupAudio]);
@@ -597,23 +595,21 @@ const MusicPlayer = () => {
   }, [isPlaying]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      {/* 主容器 - 网易云风格 */}
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+        <div className="relative rounded-2xl overflow-hidden border border-red-500/40 bg-[#0f0f14]/85 shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
+          <div className="absolute inset-0 pointer-events-none opacity-20" style={{
+            backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.25) 1px, transparent 1px), linear-gradient(45deg, rgba(232,30,45,0.3) 1px, transparent 1px)",
+            backgroundSize: "22px 22px, 26px 26px"
+          }}></div>
           <div className="flex flex-col lg:flex-row">
-            
-            {/* 左侧 - 黑胶唱片区域 */}
-            <div className="lg:w-2/5 bg-gradient-to-br from-gray-900 to-gray-800 p-8 relative overflow-hidden">
-              {/* 唱片机背景纹理 */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0" style={{
-                  backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 1px)',
-                  backgroundSize: '30px 30px'
-                }}></div>
+            <div className="lg:w-2/5 bg-gradient-to-br from-[#121217] to-[#09090c] p-8 relative overflow-hidden">
+              <div className="absolute -top-14 -left-12 w-64 h-64 bg-red-600/30 rotate-12 blur-2xl"></div>
+              <div className="absolute -bottom-14 -right-12 w-64 h-64 bg-red-900/40 -rotate-12 blur-2xl"></div>
+              <div className="absolute top-0 right-0 bg-red-600 text-white text-xs px-4 py-1 font-bold tracking-[0.2em] skew-x-[-20deg] translate-x-3">
+                P5 RADIO
               </div>
-              
-              {/* 唱针 - 暂停时抬起更明显 */}
+
               <div 
                 ref={needleRef}
                 className="absolute top-20 right-20 w-40 h-40 z-20 origin-top-left transition-transform duration-500"
@@ -623,17 +619,21 @@ const MusicPlayer = () => {
                 }}
               >
                 <div className="relative">
-                  {/* 唱针杆 */}
                   <div className="w-3 h-24 bg-gradient-to-b from-gray-300 to-gray-500 rounded-full absolute top-0 left-0 transform -rotate-45 origin-top-left shadow-lg"></div>
-                  {/* 唱针头 */}
                   <div className="w-5 h-5 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full absolute top-16 left-1 shadow-xl border border-gray-300"></div>
-                  {/* 唱针座 */}
                   <div className="w-8 h-8 bg-gradient-to-br from-gray-600 to-gray-800 rounded-full absolute -top-2 -left-2 shadow-2xl"></div>
                 </div>
               </div>
-              
-              {/* 黑胶唱片 - 暂停时停止旋转并变暗 */}
+
               <div className="relative flex justify-center items-center min-h-[400px]">
+                {/* 能量脉冲环 */}
+                <div className={`absolute w-[320px] h-[320px] rounded-full border border-red-500/40 ${
+                  isPlaying ? 'animate-pulse-ring' : ''
+                }`}></div>
+                <div className={`absolute w-[360px] h-[360px] rounded-full border border-white/10 ${
+                  isPlaying ? 'animate-pulse-ring animation-delay-2000' : ''
+                }`}></div>
+
                 <div 
                   className={`relative w-72 h-72 rounded-full transition-all duration-500 ${
                     isPlaying ? 'animate-spin-slow' : ''
@@ -643,10 +643,9 @@ const MusicPlayer = () => {
                     opacity: isPlaying ? 1 : 0.8
                   }}
                 >
-                  {/* 唱片盘 */}
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black rounded-full shadow-2xl"></div>
-                  
-                  {/* 唱片纹路 - 暂停时淡化 */}
+                  <div className="absolute inset-0 rounded-full border-2 border-red-500/40"></div>
+                  <div className="absolute inset-1 rounded-full border border-white/10"></div>
                   <div className={`absolute inset-2 rounded-full border-2 transition-opacity duration-500 ${
                     isPlaying ? 'border-gray-700' : 'border-gray-600 opacity-50'
                   }`}></div>
@@ -662,8 +661,6 @@ const MusicPlayer = () => {
                   <div className={`absolute inset-18 rounded-full border-2 transition-opacity duration-500 ${
                     isPlaying ? 'border-gray-700' : 'border-gray-600 opacity-50'
                   }`}></div>
-                  
-                  {/* 中心标签 */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-500 to-red-600 shadow-inner flex items-center justify-center">
                       <img 
@@ -673,109 +670,85 @@ const MusicPlayer = () => {
                       />
                     </div>
                   </div>
-                  
-                  {/* 唱片反光 - 暂停时减弱 */}
                   <div className={`absolute inset-0 rounded-full bg-gradient-to-br from-transparent via-white/10 to-transparent transition-opacity duration-500 ${
                     isPlaying ? 'opacity-100' : 'opacity-30'
                   }`}></div>
+
+                  {/* 扫描高光 */}
+                  <div className={`absolute inset-0 rounded-full overflow-hidden ${isPlaying ? 'opacity-100' : 'opacity-40'}`}>
+                    <div className="w-1/2 h-full bg-gradient-to-r from-transparent via-red-400/30 to-transparent animate-disc-scan"></div>
+                  </div>
                 </div>
               </div>
-              
-              {/* 歌曲信息 - 暂停时稍暗 */}
+
               <div className={`text-center mt-6 transition-opacity duration-500 ${isPlaying ? 'opacity-100' : 'opacity-80'}`}>
-                <h2 className="text-2xl font-bold mb-1 text-white">{songs[currentSong].title}</h2>
-                <p className="text-gray-300 mb-1">{songs[currentSong].artist}</p>
-                <p className="text-gray-400 text-sm">专辑：{songs[currentSong].album}</p>
+                <h2 className="text-3xl font-extrabold mb-1 text-white tracking-wide">{songs[currentSong].title}</h2>
+                <p className="text-red-300 mb-1 font-semibold">{songs[currentSong].artist}</p>
+                <p className="text-gray-400 text-sm uppercase tracking-widest">Album: {songs[currentSong].album}</p>
               </div>
-              
-              {/* 播放状态指示器 */}
+
               {!isPlaying && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-20 h-20 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <div className="w-20 h-20 bg-black/60 border border-red-500/50 rounded-full flex items-center justify-center backdrop-blur-sm">
                     <Pause className="w-10 h-10 text-white" />
                   </div>
                 </div>
               )}
             </div>
-            
-            {/* 右侧 - 歌词和音浪 */}
-            <div className="lg:w-3/5 bg-white p-8">
-              
-              {/* 音浪可视化 */}
-              <div className="mb-8 bg-gray-50 rounded-xl p-4">
+
+            <div className="lg:w-3/5 bg-[#121217]/80 p-8 border-l border-red-500/35">
+              <div className="mb-8 rounded-xl p-4 border border-red-500/30 bg-[#0b0b0f]/75">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-gray-600">音浪浮动</span>
-                  <span className="text-xs text-gray-400">{formatTime(currentTime)} / {formatTime(duration)}</span>
+                  <span className="text-sm font-bold tracking-widest text-red-300">SOUND WAVE</span>
+                  <span className="text-xs text-gray-300">{formatTime(currentTime)} / {formatTime(duration)}</span>
                 </div>
                 <div className="h-20">
                   <canvas ref={canvasRef} className="w-full h-full"></canvas>
                 </div>
               </div>
-              
-              {/* 歌词区域 - 修复横向滚动条问题 */}
+
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-gray-800">歌词</h3>
-                  <span className="text-xs text-gray-400">共 {songs[currentSong].lyrics.length} 句</span>
+                  <h3 className="text-lg font-bold text-white tracking-wide">LYRICS</h3>
+                  <span className="text-xs text-gray-300">TOTAL {songs[currentSong].lyrics.length}</span>
                 </div>
-                <div 
-                  ref={lyricsContainerRef}
-                  className="h-64 overflow-y-auto overflow-x-hidden scroll-smooth bg-gray-50/50 rounded-lg p-4"
-                  style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: `${songs[currentSong].color} #e5e7eb`
-                  }}
-                >
-                  <div className="flex flex-col items-center space-y-2 w-full">
+                <div className="h-64 rounded-lg p-4 border border-red-500/30 bg-[#0b0b0f]/78">
+                  <div
+                    className="h-full flex flex-col justify-center gap-2"
+                    style={{
+                      transform: `translateY(${lyricShiftY}px)`,
+                      transition: "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+                    }}
+                  >
                     {songs[currentSong].lyrics.length > 0 ? (
-                      songs[currentSong].lyrics.map((lyric, index) => {
-                        // 判断歌词状态
-                        const isPast = index < currentLyricIndex; // 已唱过的
-                        const isCurrent = index === currentLyricIndex; // 当前
-                        const isFuture = index > currentLyricIndex; // 未唱的
-                        
-                        return (
-                          <div
-                            key={index}
-                            className={`w-full text-center py-2 px-3 rounded-lg transition-all duration-300 ${
-                              isCurrent
-                                ? 'bg-opacity-15 font-bold transform scale-105'
-                                : isPast
-                                ? 'opacity-60'
-                                : 'opacity-40'
-                            }`}
-                            style={{
-                              backgroundColor: isCurrent ? `${songs[currentSong].color}15` : 'transparent',
-                              color: isCurrent 
-                                ? songs[currentSong].color 
-                                : isPast
-                                ? '#374151'
-                                : '#9CA3AF',
-                              borderLeft: isCurrent ? `3px solid ${songs[currentSong].color}` : '3px solid transparent',
-                              paddingLeft: isCurrent ? '12px' : '15px',
-                              paddingRight: isCurrent ? '12px' : '15px',
-                              textShadow: isCurrent ? `0 0 8px ${songs[currentSong].color}40` : 'none',
-                              wordWrap: 'break-word',
-                              whiteSpace: 'normal'
-                            }}
-                          >
-                            {lyric.text}
-                          </div>
-                        );
-                      })
+                      lyricWindow.map((line, idx) => (
+                        <div
+                          key={line.key}
+                          className={`w-full text-center py-2 px-3 rounded-lg transition-all duration-300 ${
+                            line.isCurrent ? 'font-bold scale-105' : 'opacity-55'
+                          } ${idx === 2 && !line.isCurrent ? 'opacity-70' : ''}`}
+                          style={{
+                            minHeight: "40px",
+                            backgroundColor: line.isCurrent ? "rgba(232,30,45,0.22)" : "transparent",
+                            color: line.isCurrent ? "#ff4051" : "#a0a8b8",
+                            borderLeft: line.isCurrent ? "3px solid #ff3d4f" : "3px solid transparent",
+                            textShadow: line.isCurrent ? "0 0 10px rgba(255,61,79,0.55)" : "none",
+                          }}
+                        >
+                          {line.text || " "}
+                        </div>
+                      ))
                     ) : (
-                      <div className="h-full flex items-center justify-center text-gray-500 italic">
+                      <div className="h-full flex items-center justify-center text-gray-400 italic">
                         暂无歌词
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-              
-              {/* 播放控制条 */}
+
               <div className="space-y-4">
-                {/* 进度条 */}
-                <div className="flex items-center space-x-2 text-xs text-gray-400">
+                <div className="flex items-center space-x-2 text-xs text-gray-300">
                   <span className="w-10 text-right">{formatTime(currentTime)}</span>
                   <input
                     type="range"
@@ -783,17 +756,16 @@ const MusicPlayer = () => {
                     max={duration || 100}
                     value={currentTime}
                     onChange={handleSeek}
-                    className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                    className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer p5-slider"
                     style={{
-                      background: `linear-gradient(to right, ${songs[currentSong].color} 0%, ${songs[currentSong].color} ${(currentTime/duration)*100}%, #e5e7eb ${(currentTime/duration)*100}%, #e5e7eb 100%)`
+                      background: `linear-gradient(to right, #ff3d4f 0%, #ff3d4f ${(currentTime/duration)*100 || 0}%, #2f3440 ${(currentTime/duration)*100 || 0}%, #2f3440 100%)`
                     }}
                   />
                   <span className="w-10">{formatTime(duration)}</span>
                 </div>
-                
-                {/* 控制按钮 */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
+
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center space-x-2 bg-black/30 rounded-xl px-2 py-1 border border-red-500/25">
                     <button 
                       onClick={() => setPlayMode(prev => {
                         if (prev === 'loop') return 'random';
@@ -801,30 +773,30 @@ const MusicPlayer = () => {
                         return 'loop';
                       })}
                       className={`p-2 rounded-full transition-all ${
-                        playMode !== 'loop' ? `text-[${songs[currentSong].color}]` : 'text-gray-400'
-                      } hover:bg-gray-100`}
+                        playMode !== 'loop' ? 'text-red-400' : 'text-gray-400'
+                      } hover:bg-white/10`}
                     >
                       <Shuffle className="w-5 h-5" />
                     </button>
-                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-all">
+                    <button className="p-2 text-gray-400 hover:text-red-300 transition-all">
                       <Repeat className="w-5 h-5" />
                     </button>
                   </div>
-                  
-                  <div className="flex items-center space-x-4">
+
+                  <div className="flex items-center space-x-4 bg-black/30 rounded-2xl px-3 py-2 border border-red-500/25">
                     <button 
                       onClick={playPrevious}
-                      className="p-3 hover:bg-gray-100 rounded-full transition-all"
+                      className="p-3 hover:bg-white/10 rounded-full transition-all"
                     >
-                      <SkipBack className="w-5 h-5 text-gray-600" />
+                      <SkipBack className="w-5 h-5 text-gray-200" />
                     </button>
-                    
+
                     <button 
                       onClick={togglePlay}
                       className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all transform hover:scale-105"
                       style={{
-                        background: `linear-gradient(135deg, ${songs[currentSong].color}, ${songs[currentSong].color}dd)`,
-                        boxShadow: isPlaying ? `0 4px 15px ${songs[currentSong].color}80` : '0 4px 10px rgba(0,0,0,0.1)'
+                        background: "linear-gradient(135deg, #ff3d4f, #a50f1f)",
+                        boxShadow: isPlaying ? "0 4px 18px rgba(255,61,79,0.58)" : "0 4px 10px rgba(0,0,0,0.35)"
                       }}
                     >
                       {isPlaying ? 
@@ -832,40 +804,39 @@ const MusicPlayer = () => {
                         <Play className="w-6 h-6 text-white ml-1" />
                       }
                     </button>
-                    
+
                     <button 
                       onClick={playNext}
-                      className="p-3 hover:bg-gray-100 rounded-full transition-all"
+                      className="p-3 hover:bg-white/10 rounded-full transition-all"
                     >
-                      <SkipForward className="w-5 h-5 text-gray-600" />
+                      <SkipForward className="w-5 h-5 text-gray-200" />
                     </button>
                   </div>
-                  
-                  <div className="flex items-center space-x-2">
+
+                  <div className="flex items-center space-x-2 bg-black/30 rounded-xl px-2 py-1 border border-red-500/25">
                     <button 
                       onClick={() => setIsLiked(!isLiked)}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-all"
+                      className="p-2 hover:bg-white/10 rounded-full transition-all"
                     >
-                      <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
+                      <Heart className={`w-5 h-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-300'}`} />
                     </button>
-                    <button className="p-2 hover:bg-gray-100 rounded-full transition-all">
-                      <Share2 className="w-5 h-5 text-gray-400" />
+                    <button className="p-2 hover:bg-white/10 rounded-full transition-all">
+                      <Share2 className="w-5 h-5 text-gray-300" />
                     </button>
                     <button 
                       onClick={() => setShowPlaylist(!showPlaylist)}
-                      className="p-2 hover:bg-gray-100 rounded-full transition-all"
+                      className="p-2 hover:bg-white/10 rounded-full transition-all"
                     >
-                      <List className="w-5 h-5 text-gray-400" />
+                      <List className="w-5 h-5 text-gray-300" />
                     </button>
                   </div>
                 </div>
-                
-                {/* 音量控制 */}
-                <div className="flex items-center space-x-2 pt-2">
-                  <button onClick={toggleMute} className="p-1">
+
+                <div className="flex items-center space-x-2 pt-2 text-gray-300">
+                  <button onClick={toggleMute} className="p-1 hover:text-red-300 transition-colors">
                     {isMuted ? 
-                      <VolumeX className="w-4 h-4 text-gray-400" /> : 
-                      <Volume2 className="w-4 h-4 text-gray-400" />
+                      <VolumeX className="w-4 h-4" /> : 
+                      <Volume2 className="w-4 h-4" />
                     }
                   </button>
                   <input
@@ -874,30 +845,29 @@ const MusicPlayer = () => {
                     max="100"
                     value={isMuted ? 0 : volume * 100}
                     onChange={updateVolume}
-                    className="w-24 h-1 bg-gray-200 rounded-full appearance-none cursor-pointer"
+                    className="w-24 h-1 bg-gray-700 rounded-full appearance-none cursor-pointer p5-slider"
                   />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        {/* 播放列表 - 浮层 */}
+
         {showPlaylist && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowPlaylist(false)}>
-            <div className="bg-white rounded-xl max-w-md w-full max-h-[600px] overflow-hidden" onClick={e => e.stopPropagation()}>
-              <div className="p-4 border-b flex justify-between items-center">
-                <h3 className="font-semibold">播放列表</h3>
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setShowPlaylist(false)}>
+            <div className="bg-[#111116] border border-red-500/35 rounded-xl max-w-md w-full max-h-[600px] overflow-hidden text-white" onClick={e => e.stopPropagation()}>
+              <div className="p-4 border-b border-red-500/25 flex justify-between items-center">
+                <h3 className="font-bold tracking-wide">PHANTOM PLAYLIST</h3>
                 <button onClick={() => setShowPlaylist(false)}>
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 text-gray-300 hover:text-red-400 transition-colors" />
                 </button>
               </div>
               <div className="overflow-y-auto max-h-[500px]">
                 {songs.map((song, index) => (
                   <div
                     key={song.id}
-                    className={`flex items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      index === currentSong ? 'bg-gray-50' : ''
+                    className={`flex items-center p-3 cursor-pointer transition-colors ${
+                      index === currentSong ? 'bg-red-500/15' : 'hover:bg-white/5'
                     }`}
                     onClick={() => {
                       playSong(index);
@@ -906,12 +876,12 @@ const MusicPlayer = () => {
                   >
                     <img src={song.cover} alt="" className="w-12 h-12 rounded object-cover mr-3" />
                     <div className="flex-1">
-                      <h4 className={`font-medium ${index === currentSong ? `text-[${song.color}]` : ''}`}>
+                      <h4 className={`font-medium ${index === currentSong ? 'text-red-400' : 'text-white'}`}>
                         {song.title}
                       </h4>
-                      <p className="text-sm text-gray-500">{song.artist}</p>
+                      <p className="text-sm text-gray-400">{song.artist}</p>
                     </div>
-                    <span className="text-sm text-gray-400">{song.duration}</span>
+                    <span className="text-sm text-gray-500">{song.duration}</span>
                   </div>
                 ))}
               </div>
@@ -929,7 +899,6 @@ const MusicPlayer = () => {
         preload="metadata"
       />
 
-      {/* 全局样式 */}
       <style jsx>{`
         @keyframes spin-slow {
           from { transform: rotate(0deg); }
@@ -938,45 +907,88 @@ const MusicPlayer = () => {
         .animate-spin-slow {
           animation: spin-slow 20s linear infinite;
         }
-        input[type="range"] {
+        @keyframes pulse-ring {
+          0% {
+            transform: scale(0.92);
+            opacity: 0.6;
+          }
+          70% {
+            transform: scale(1.04);
+            opacity: 0.12;
+          }
+          100% {
+            transform: scale(1.08);
+            opacity: 0;
+          }
+        }
+        .animate-pulse-ring {
+          animation: pulse-ring 2.6s ease-out infinite;
+        }
+        @keyframes disc-scan {
+          0% {
+            transform: translateX(-120%) skewX(-25deg);
+          }
+          100% {
+            transform: translateX(280%) skewX(-25deg);
+          }
+        }
+        .animate-disc-scan {
+          animation: disc-scan 2.8s linear infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 1.3s;
+        }
+        .p5-slider {
           -webkit-appearance: none;
         }
-        input[type="range"]::-webkit-slider-thumb {
+        .p5-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
-          width: 16px;
-          height: 16px;
+          width: 15px;
+          height: 15px;
           border-radius: 50%;
           background: white;
-          border: 2px solid ${songs[currentSong]?.color || '#d53f8c'};
+          border: 2px solid #ff3d4f;
           cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          margin-top: -6px;
+          box-shadow: 0 2px 10px rgba(232,30,45,0.45);
+          margin-top: -5px;
         }
-        input[type="range"]::-webkit-slider-thumb:hover {
+        .p5-slider::-webkit-slider-thumb:hover {
           transform: scale(1.2);
-          box-shadow: 0 2px 12px ${songs[currentSong]?.color}80;
+          box-shadow: 0 2px 12px rgba(255,61,79,0.75);
         }
-        input[type="range"]::-webkit-slider-runnable-track {
+        .p5-slider::-webkit-slider-runnable-track {
           height: 4px;
           border-radius: 2px;
+        }
+        .p5-slider::-moz-range-thumb {
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+          background: white;
+          border: 2px solid #ff3d4f;
+          cursor: pointer;
+        }
+        .p5-slider::-moz-range-track {
+          height: 4px;
+          border-radius: 2px;
+          background: #2f3440;
         }
         .scroll-smooth {
           scroll-behavior: smooth;
         }
-        /* 自定义滚动条样式 */
         ::-webkit-scrollbar {
           width: 6px;
         }
         ::-webkit-scrollbar-track {
-          background: #f1f1f1;
+          background: #14141c;
           border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-          background: ${songs[currentSong]?.color || '#d53f8c'}80;
+          background: rgba(255, 61, 79, 0.6);
           border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-          background: ${songs[currentSong]?.color || '#d53f8c'};
+          background: #ff3d4f;
         }
       `}</style>
     </div>

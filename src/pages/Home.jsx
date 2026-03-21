@@ -146,8 +146,6 @@ const animeThemes = [
   { emoji: "⚡", name: "Vite", color: "from-purple-400 to-pink-400", bg: "bg-purple-50" },
 ];
 
-const floatingIcons = ["⚛️", "📘", "▲", "🎨", "📦", "⚡", "🔥", "💻", "🚀", "✨"];
-
 const Home = () => {
   const [featuredPosts] = useState(() => {
     return extendedPostsData.slice(0, 3);
@@ -190,35 +188,7 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F1C] text-white relative overflow-x-hidden">
-      {/* 科技感网格背景 */}
-      <div className="fixed inset-0 opacity-20">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(#4FD1C5 1px, transparent 1px),
-            linear-gradient(90deg, #4FD1C5 1px, transparent 1px)
-          `,
-          backgroundSize: '50px 50px'
-        }}></div>
-      </div>
-
-      {/* 浮动图标背景 */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {floatingIcons.map((icon, i) => (
-          <div
-            key={i}
-            className="absolute text-4xl opacity-5 animate-float"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${i * 0.5}s`,
-              animationDuration: `${10 + i * 2}s`
-            }}
-          >
-            {icon}
-          </div>
-        ))}
-      </div>
+    <div className="min-h-screen text-white relative overflow-x-hidden">
 
       {/* 主内容 */}
       <div className="relative z-10">
@@ -384,7 +354,7 @@ const Home = () => {
               
               <div className="space-y-6">
                 {regularPosts.map((post) => (
-                  <div key={post.id} className="bg-[#1A1F2E] rounded-xl p-6 border border-[#4FD1C5]/10 hover:border-[#4FD1C5]/30 transition-all group">
+                  <div key={post.id} className="glass-card rounded-xl p-6 hover:border-[#4FD1C5]/30 transition-all group">
                     <div className="flex items-start space-x-4">
                       <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
                         <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -431,7 +401,7 @@ const Home = () => {
             {/* 侧边栏 */}
             <div className="space-y-6">
               {/* 作者卡片 */}
-              <div className="bg-[#1A1F2E] rounded-xl p-6 border border-[#4FD1C5]/10">
+              <div className="glass-card rounded-xl p-6">
                 <div className="text-center mb-4">
                   <div className="w-20 h-20 bg-gradient-to-br from-[#4FD1C5] to-[#9F7AEA] rounded-full mx-auto mb-3 flex items-center justify-center">
                     <span className="text-3xl">👨‍💻</span>
@@ -456,7 +426,7 @@ const Home = () => {
               </div>
               
               {/* 热门标签 */}
-              <div className="bg-[#1A1F2E] rounded-xl p-6 border border-[#4FD1C5]/10">
+              <div className="glass-card rounded-xl p-6">
                 <h3 className="text-lg font-bold text-white mb-4">热门标签</h3>
                 <div className="flex flex-wrap gap-2">
                   {["React", "TypeScript", "Next.js", "性能优化", "源码", "Hooks", "状态管理", "动画", "测试", "架构"].map((tag, i) => (
@@ -468,7 +438,7 @@ const Home = () => {
               </div>
               
               {/* 订阅卡片 */}
-              <div className="bg-gradient-to-br from-[#1A1F2E] to-[#2A2F3E] rounded-xl p-6 border border-[#4FD1C5]/10">
+              <div className="glass-card bg-gradient-to-br from-[#1A1F2E] to-[#2A2F3E] rounded-xl p-6">
                 <h3 className="text-lg font-bold text-white mb-2">订阅更新</h3>
                 <p className="text-sm text-gray-400 mb-4">
                   每周精选技术文章，第一时间送达
@@ -500,31 +470,6 @@ const Home = () => {
         </footer>
       </div>
 
-      {/* 动画样式 */}
-      <style jsx>{`
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-          animation: spin-slow 20s linear infinite;
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(5deg); }
-        }
-        .animate-float {
-          animation: float linear infinite;
-        }
-        
-        .line-clamp-2 {
-          display: -webkit-box;
-          -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical;
-          overflow: hidden;
-        }
-      `}</style>
     </div>
   );
 };

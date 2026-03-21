@@ -76,7 +76,7 @@ const Contact = () => {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-50 py-16 overflow-x-hidden"
+      className="min-h-screen py-16 overflow-x-hidden"
       style={{ minHeight: "100vh" }}
     >
       {/* 装饰性元素 - 小清新点缀 */}
