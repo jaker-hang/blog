@@ -7,7 +7,7 @@ import P5MapBackground from "./components/common/P5MapBackground";
 import Home from "./pages/Home";
 import PostDetail from "./pages/PostDetail";
 import About from "./pages/About";
-import Contact from "./pages/Contact";
+
 import LovePage from "./pages/LovePage";
 import MusicPlayer from "./pages/Music";
 import Travel from "./pages/Travel";
@@ -47,7 +47,7 @@ function FullScreenWrapper({ children }) {
         <div className="relative flex flex-col min-h-screen app-main-bg p5-theme">
           <P5MapBackground />
           <Navbar isScrolled={isScrolled} />
-          <main className="relative z-10 flex-grow pt-24 pb-16">{children}</main>
+          <main className="relative z-10 flex-grow">{children}</main>
           <Footer />
           <BackToTop />
         </div>
@@ -70,7 +70,7 @@ function App() {
         <Route path="/lovePage" element={<LovePage />} />
         <Route path="/music" element={<MusicPlayer />} />
         <Route path="/travel" element={<Travel />} />
-        <Route path="/contact" element={<Contact />} />
+
         <Route
           path="/post/:id"
           element={<PostDetail getPostById={getPostById} />}

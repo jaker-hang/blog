@@ -6,7 +6,7 @@ const Footer = () => {
     { name: '首页', path: '/' },
     { name: '文章', path: '/article' },
     { name: '关于', path: '/about' },
-    { name: '联系', path: '/contact' }
+
   ];
 
   return (
@@ -48,20 +48,7 @@ const Footer = () => {
             </div>
           </div>
           
-          {/* 联系信息 */}
-          <div className="md:col-span-1">
-            <h3 className="text-xl font-bold text-white mb-4">联系信息</h3>
-            <ul className="space-y-2 text-white/70">
-              <li className="flex items-start">
-                <i className="fa fa-envelope mt-1 mr-3 text-white/80"></i>
-                <span>1489751526@qq.com</span>
-              </li>
-              <li className="flex items-start">
-                <i className="fa fa-map-marker mt-1 mr-3 text-white/80"></i>
-                <span>广东省深圳市</span>
-              </li>
-            </ul>
-          </div>
+
         </div>
         
         {/* 版权信息 */}

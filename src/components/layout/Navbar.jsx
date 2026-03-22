@@ -48,14 +48,7 @@ const Navbar = ({ isScrolled, transparent = false }) => {
       glow: "purple",
       emoji: "🎶"
     },
-    { 
-      name: "联系", 
-      path: "/contact", 
-      icon: "✉️", 
-      color: "from-pink-400 to-rose-400",
-      glow: "pink",
-      emoji: "💫"
-    },
+
   ];
 
   // 动漫角色装饰
