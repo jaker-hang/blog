@@ -2,11 +2,11 @@
 
 一个现代化、响应式的个人博客网站实现，基于 React 和 Tailwind CSS 构建，具有优雅的 UI 设计和流畅的用户体验。
 
-在线预览地址https://devserver-dev--famous-wisp-ba5e6c.netlify.app/
+在线预览地址: https://65f7e7ce.pinit.eth.limo
 
 爱心参考网站：https://love.burnham.xin/
 
-项目部署网站：https://www.netlify.com/
+项目部署网站：https://pinme.eth.limo/
 
 <div align="center">
 
