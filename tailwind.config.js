@@ -14,6 +14,7 @@ module.exports = {
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
+        p5jp: ['"Noto Sans JP"', 'Hiragino Sans', 'Yu Gothic', 'Meiryo', 'sans-serif'],
       },
     },
   },

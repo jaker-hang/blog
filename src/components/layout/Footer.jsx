@@ -1,62 +1,26 @@
-import { Link } from 'react-router-dom';
-import { author } from '../../utils/data';
+import { Link } from "react-router-dom";
 
 const Footer = () => {
-  const navLinks = [
-    { name: '首页', path: '/' },
-    { name: '文章', path: '/article' },
-    { name: '关于', path: '/about' },
-
-  ];
-
   return (
-    <footer className="bg-white/10 border-t border-white/20 pt-16 pb-8 backdrop-blur-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          {/* 关于 */}
-          <div className="md:col-span-1">
-            <h3 className="text-xl font-bold text-white mb-4">我的博客</h3>
-            <p className="text-white/70 mb-4">
-              分享技术、生活和思考的个人博客网站。
-            </p>
-            <div className="flex space-x-4">
-              {author.socialLinks.map((link, index) => (
-                <a 
-                  key={index} 
-                  href={link.url} 
-                  className="text-white/80 hover:text-white transition-colors"
-                >
-                  <i className={`${link.icon} text-lg`}></i>
-                </a>
-              ))}
-            </div>
-          </div>
-          
-          {/* 导航链接 */}
-          <div className="md:col-span-2">
-            <h3 className="text-xl font-bold text-white mb-4">快速链接</h3>
-            <div className="grid grid-cols-2 gap-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="text-white/80 hover:text-white transition-colors"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-          
-
+    <footer className="border-t border-red-900/40 bg-black/80 backdrop-blur-sm py-10 px-4 font-p5jp">
+      <div className="max-w-5xl mx-auto text-center space-y-4">
+        <div className="flex flex-wrap justify-center gap-4 text-[11px] font-bold text-zinc-500">
+          <Link to="/" className="hover:text-red-400 transition-colors">
+            トップ
+          </Link>
+          <Link to="/#character" className="hover:text-red-400 transition-colors">
+            キャラクター
+          </Link>
+          <Link to="/#news" className="hover:text-red-400 transition-colors">
+            NEWS
+          </Link>
         </div>
-        
-        {/* 版权信息 */}
-        <div className="border-t border-white/20 pt-8 text-center">
-          <p className="text-white/70">
-            &copy; {new Date().getFullYear()} 我的博客. 保留所有权利。
-          </p>
-        </div>
+        <p className="text-[10px] text-zinc-600 leading-relaxed max-w-2xl mx-auto">
+          非公式ファン向けレイアウト再現。商標・原作は各権利者に帰属します。
+        </p>
+        <p className="text-[10px] text-zinc-700">
+          ©ATLUS ©SEGA — tribute layout
+        </p>
       </div>
     </footer>
   );

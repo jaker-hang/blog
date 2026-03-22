@@ -1,533 +1,541 @@
-import { useState, useEffect } from "react";
-import SubscribeForm from "../components/common/SubscribeForm";
+import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
+import P5Img from "../components/common/P5Img";
+import {
+  P5,
+  newsItems,
+  carouselSlides,
+  galleryCaptions,
+  tarotShowcase,
+  characterSlides,
+  specLines,
+  img,
+} from "../data/p5rHomeData";
+import "./Home.css";
 
-// 扩展文章数据，添加React相关文章
-const extendedPostsData = [
-  // React 核心文章
-  {
-    id: 1,
-    title: "React 18 并发渲染原理与实践",
-    excerpt:
-      "深入理解 React 18 的并发特性，通过实际案例学习如何使用 useTransition 和 useDeferredValue 优化用户体验。",
-    date: "2024-02-15",
-    author: "冯行",
-    category: "React 进阶",
-    tags: ["React 18", "并发渲染", "性能优化"],
-    image: "https://picsum.photos/id/1/800/400",
-    readTime: "8 min",
-    likes: 234,
-    comments: 56,
-  },
-  {
-    id: 2,
-    title: "TypeScript 类型体操：从入门到放弃再到精通",
-    excerpt:
-      "探索 TypeScript 的高级类型，实现条件类型、映射类型和递归类型，打造类型安全的 React 应用。",
-    date: "2024-02-10",
-    author: "冯行",
-    category: "TypeScript",
-    tags: ["TypeScript", "类型编程", "类型安全"],
-    image: "https://picsum.photos/id/20/800/400",
-    readTime: "12 min",
-    likes: 189,
-    comments: 42,
-  },
-  {
-    id: 3,
-    title: "Next.js 14 服务端组件深度解析",
-    excerpt:
-      "从架构设计到实际应用，全面解析 Next.js 14 的服务端组件模式，以及如何在项目中合理使用。",
-    date: "2024-02-05",
-    author: "冯行",
-    category: "Next.js",
-    tags: ["Next.js 14", "服务端组件", "SSR"],
-    image: "https://picsum.photos/id/21/800/400",
-    readTime: "10 min",
-    likes: 156,
-    comments: 38,
-  },
-  {
-    id: 4,
-    title: "React 性能优化：从渲染原理到实战技巧",
-    excerpt:
-      "深入 React 渲染机制，掌握 memo、useMemo、useCallback 的正确使用姿势，告别不必要的重渲染。",
-    date: "2024-01-28",
-    author: "冯行",
-    category: "性能优化",
-    tags: ["性能优化", "渲染", "最佳实践"],
-    image: "https://picsum.photos/id/26/800/400",
-    readTime: "15 min",
-    likes: 312,
-    comments: 67,
-  },
-  {
-    id: 5,
-    title: "React Hooks 源码实现：手写一个迷你版",
-    excerpt:
-      "通过手写实现 useState、useEffect 等核心 Hooks，深入理解 Fiber 架构和 Hook 的工作原理。",
-    date: "2024-01-20",
-    author: "冯行",
-    category: "React 源码",
-    tags: ["Hooks", "源码分析", "Fiber"],
-    image: "https://picsum.photos/id/30/800/400",
-    readTime: "7 min",
-    likes: 145,
-    comments: 29,
-  },
-  {
-    id: 6,
-    title: "Zustand vs Redux：现代状态管理方案对比",
-    excerpt:
-      "深入对比 Zustand、Redux Toolkit、Jotai 等状态管理库，帮你选择最适合项目的方案。",
-    date: "2024-01-12",
-    author: "冯行",
-    category: "状态管理",
-    tags: ["Zustand", "Redux", "状态管理"],
-    image: "https://picsum.photos/id/36/800/400",
-    readTime: "9 min",
-    likes: 278,
-    comments: 51,
-  },
-  {
-    id: 7,
-    title: "TailwindCSS 高级技巧：打造可复用的组件库",
-    excerpt:
-      "结合 React 和 TailwindCSS，学习如何设计原子化的组件系统，提升开发效率和一致性。",
-    date: "2024-01-05",
-    author: "冯行",
-    category: "CSS",
-    tags: ["TailwindCSS", "组件库", "设计系统"],
-    image: "https://picsum.photos/id/42/800/400",
-    readTime: "11 min",
-    likes: 167,
-    comments: 34,
-  },
-  {
-    id: 8,
-    title: "React 测试实战：从单元测试到 E2E",
-    excerpt:
-      "使用 Jest、React Testing Library 和 Cypress，构建完整的 React 应用测试体系。",
-    date: "2023-12-28",
-    author: "冯行",
-    category: "测试",
-    tags: ["Jest", "测试", "Cypress"],
-    image: "https://picsum.photos/id/48/800/400",
-    readTime: "10 min",
-    likes: 123,
-    comments: 27,
-  },
-  {
-    id: 9,
-    title: "Framer Motion 动画实战：让 React 应用动起来",
-    excerpt:
-      "掌握 Framer Motion 的核心概念，为 React 应用添加流畅自然的交互动画效果。",
-    date: "2023-12-20",
-    author: "冯行",
-    category: "动画",
-    tags: ["Framer Motion", "动画", "交互"],
-    image: "https://picsum.photos/id/55/800/400",
-    readTime: "8 min",
-    likes: 198,
-    comments: 41,
-  },
-  {
-    id: 10,
-    title: "React 设计模式：构建可维护的大型应用",
-    excerpt:
-      "探讨 React 项目中的架构设计模式，包括容器组件、高阶组件、Render Props 等。",
-    date: "2023-12-12",
-    author: "冯行",
-    category: "架构设计",
-    tags: ["设计模式", "架构", "最佳实践"],
-    image: "https://picsum.photos/id/60/800/400",
-    readTime: "13 min",
-    likes: 234,
-    comments: 48,
-  },
-];
+function TarotCard({ roman, arcana, role, blurb, accent }) {
+  const [spinning, setSpinning] = useState(false);
 
-// 动漫风格数据
-const animeThemes = [
-  {
-    emoji: "⚛️",
-    name: "React",
-    color: "from-blue-400 to-cyan-400",
-    bg: "bg-blue-50",
-  },
-  {
-    emoji: "📘",
-    name: "TypeScript",
-    color: "from-blue-500 to-indigo-500",
-    bg: "bg-blue-50",
-  },
-  {
-    emoji: "▲",
-    name: "Next.js",
-    color: "from-gray-800 to-gray-600",
-    bg: "bg-gray-50",
-  },
-  {
-    emoji: "🎨",
-    name: "Tailwind",
-    color: "from-cyan-400 to-teal-400",
-    bg: "bg-cyan-50",
-  },
-  {
-    emoji: "📦",
-    name: "Zustand",
-    color: "from-amber-400 to-orange-400",
-    bg: "bg-amber-50",
-  },
-  {
-    emoji: "⚡",
-    name: "Vite",
-    color: "from-purple-400 to-pink-400",
-    bg: "bg-purple-50",
-  },
-];
+  const triggerSpin = useCallback(() => {
+    if (spinning) return;
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+    setSpinning(true);
+    window.setTimeout(() => setSpinning(false), 920);
+  }, [spinning]);
 
-const Home = () => {
-  const [featuredPosts] = useState(() => {
-    return extendedPostsData.slice(0, 3);
-  });
-
-  const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
-
-  // 排除特色文章
-  const regularPosts = extendedPostsData.filter(
-    (post) => !featuredPosts.some((fp) => fp.id === post.id),
+  return (
+    <article
+      role="button"
+      tabIndex={0}
+      className={`p5-tarot-card ${spinning ? "p5-tarot-card--spin" : ""}`}
+      style={{ "--p5-tarot-accent": accent }}
+      onClick={triggerSpin}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          triggerSpin();
+        }
+      }}
+      aria-label={`${arcana}：点击旋转`}
+    >
+      <div className="p5-tarot-card__frame" aria-hidden />
+      <div className="p5-tarot-card__spin-inner">
+        <div className="p5-tarot-card__inner">
+          <span className="p5-tarot-card__roman">{roman}</span>
+          <h3 className="p5-tarot-card__arcana">{arcana}</h3>
+          <p className="p5-tarot-card__role">{role}</p>
+          <p className="p5-tarot-card__blurb">{blurb}</p>
+          <span className="p5-tarot-card__hint">点击旋转</span>
+        </div>
+      </div>
+    </article>
   );
+}
 
-  // 自动轮播
-  useEffect(() => {
-    if (featuredPosts.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentFeaturedIndex(
-        (prevIndex) => (prevIndex + 1) % featuredPosts.length,
-      );
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [featuredPosts.length]);
-
-  const goToSlide = (index) => {
-    setCurrentFeaturedIndex(index);
-  };
-
-  const nextSlide = () => {
-    setCurrentFeaturedIndex((prevIndex) =>
-      prevIndex === featuredPosts.length - 1 ? 0 : prevIndex + 1,
-    );
-  };
-
-  const prevSlide = () => {
-    setCurrentFeaturedIndex((prevIndex) =>
-      prevIndex === 0 ? featuredPosts.length - 1 : prevIndex - 1,
-    );
-  };
+/**
+ * 主页：女神异闻录5 风格重设计 — 塔罗 / 主人公 / 游戏截图轮播（资源均来自 public/resources）
+ */
+const Home = () => {
+  const [carouselIdx, setCarouselIdx] = useState(0);
+  const [charIdx, setCharIdx] = useState(0);
 
   useEffect(() => {
-    // 确保页面滚动始终可用
+    document.documentElement.lang = "zh-CN";
     document.body.style.overflow = "auto";
   }, []);
 
+  useEffect(() => {
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return undefined;
+    const t = setInterval(() => {
+      setCarouselIdx((i) => (i + 1) % carouselSlides.length);
+    }, 5200);
+    return () => clearInterval(t);
+  }, []);
+
+  const cap =
+    galleryCaptions[carouselIdx] ?? galleryCaptions[0] ?? "";
+
+  const currentChar = characterSlides[charIdx] ?? characterSlides[0];
+
+  const galleryN = carouselSlides.length;
+  const galleryPrevI = (carouselIdx - 1 + galleryN) % galleryN;
+  const galleryNextI = (carouselIdx + 1) % galleryN;
+
   return (
-    <div className="min-h-screen text-white relative overflow-x-hidden">
-      {/* 主内容 */}
-      <div className="relative z-10">
-        {/* Hero 区域 - 科技动漫风 */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="relative">
-            {/* 装饰圆环 */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-[#4FD1C5] rounded-full filter blur-3xl opacity-10"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#9F7AEA] rounded-full filter blur-3xl opacity-10"></div>
-
-            <div className="relative text-center">
-              <div className="inline-block mb-6">
-                <div className="relative">
-                  <div className="w-28 h-28 bg-gradient-to-br from-[#4FD1C5] to-[#9F7AEA] rounded-2xl rotate-45 animate-spin-slow opacity-50"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-5xl">⚛️</span>
-                  </div>
-                </div>
+    <div
+      id="top"
+      className="p5r-official-root p5-home-redesign p5r-page p5r-home-content bg-black text-white overflow-x-hidden -mt-14 pt-14 sm:-mt-16 sm:pt-16 md:-mt-[4.5rem] md:pt-[4.5rem]"
+    >
+      <div className="p5r-main">
+        {/* —— 头图 —— */}
+        <section className="p5-hero p5r-first-view relative pb-10 md:pb-14 overflow-hidden">
+          {/* 装饰背景：绝对定位，不参与文档流占位 */}
+          <div className="p5-hero-bg" aria-hidden>
+            <div className="p5r-kv-bg absolute inset-0 overflow-hidden">
+              <div className="p5r-bg-stars pointer-events-none absolute inset-0" />
+              <div className="p5r-kv-p5fx pointer-events-none absolute inset-0" />
+              <div className="p5r-bg-top pointer-events-none absolute left-0 right-0 top-0 z-[2]" />
+              <div className="p5-hero-redline pointer-events-none absolute left-1/2 bottom-0 z-[3] w-full max-w-[1218px] -translate-x-1/2 flex justify-center items-end">
+                <P5Img
+                  path="/resources/img/top/bg_red_line_fe82daa77927be565a03f46a0c7cbf04.png"
+                  alt=""
+                  className="w-full h-auto max-h-[min(22vh,200px)] object-contain object-bottom opacity-90 select-none"
+                  loading="eager"
+                  draggable={false}
+                />
               </div>
+            </div>
+          </div>
 
-              <h1 className="text-5xl md:text-6xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-[#4FD1C5] via-[#9F7AEA] to-[#F687B3] bg-clip-text text-transparent">
-                  冯行の技术博客
+          <div className="p5r-wrapper relative z-10">
+            <div className="p5-hero__titleblock">
+              <p className="p5-hero__eyebrow">PERSONA 5 THE ROYAL</p>
+              <h1 className="p5-hero__h1">
+                <span className="p5-hero__h1-line">夺取吧，</span>
+                <span className="p5-hero__h1-line p5-hero__h1-line--accent">
+                  以那份意志。
                 </span>
               </h1>
-
-              <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-6">
-                探索 React 的无限可能 · 分享前沿技术实践 · 记录编程思考
+              <p className="p5-hero__sub">
+                校园日常 × 怪盗非日常 · 塔罗式命运 UI · 本地素材陈列
               </p>
-
-              {/* 技术标签云 */}
-              <div className="flex flex-wrap justify-center gap-3 max-w-xl mx-auto">
-                {animeThemes.map((theme, index) => (
-                  <div
-                    key={index}
-                    className={`px-4 py-2 rounded-full bg-gradient-to-r ${theme.color} text-white text-sm font-medium shadow-lg hover:scale-110 transition-transform cursor-pointer`}
-                  >
-                    {theme.emoji} {theme.name}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 特色文章轮播 - 科技卡片风格 */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-          <div className="relative h-[500px] rounded-2xl overflow-hidden group">
-            {/* 轮播内容 */}
-            {featuredPosts.map((post, index) => (
-              <div
-                key={post.id}
-                className={`absolute inset-0 transition-all duration-700 ${
-                  index === currentFeaturedIndex
-                    ? "opacity-100 z-10"
-                    : "opacity-0 z-0"
-                }`}
-              >
-                <div className="relative h-full">
-                  <img
-                    src={post.image}
-                    alt={post.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F1C] via-transparent to-transparent"></div>
-
-                  {/* 文章信息 */}
-                  <div className="absolute bottom-0 left-0 right-0 p-8">
-                    <div className="max-w-3xl">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <span className="px-3 py-1 bg-[#4FD1C5] text-[#0B0F1C] text-sm font-medium rounded-full">
-                          {post.category}
-                        </span>
-                        <span className="text-gray-300 text-sm">
-                          {post.readTime}
-                        </span>
-                      </div>
-                      <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                        {post.title}
-                      </h2>
-                      <p className="text-gray-300 text-lg mb-4 max-w-2xl">
-                        {post.excerpt}
-                      </p>
-                      <div className="flex items-center space-x-4">
-                        <button className="px-6 py-3 bg-[#4FD1C5] text-[#0B0F1C] font-medium rounded-xl hover:bg-[#3BB5A9] transition-all transform hover:scale-105">
-                          阅读全文 →
-                        </button>
-                        <div className="flex items-center space-x-3 text-gray-300">
-                          <span>❤️ {post.likes}</span>
-                          <span>💬 {post.comments}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* 轮播控制器 */}
-            {featuredPosts.length > 1 && (
-              <>
-                <button
-                  onClick={prevSlide}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-[#1A1F2E] border border-[#4FD1C5]/30 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#4FD1C5] hover:text-[#0B0F1C] z-20"
-                >
-                  ←
-                </button>
-                <button
-                  onClick={nextSlide}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-[#1A1F2E] border border-[#4FD1C5]/30 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-[#4FD1C5] hover:text-[#0B0F1C] z-20"
-                >
-                  →
-                </button>
-              </>
-            )}
-
-            {/* 指示器 */}
-            {featuredPosts.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
-                {featuredPosts.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToSlide(index)}
-                    className={`h-2 rounded-full transition-all ${
-                      index === currentFeaturedIndex
-                        ? "w-8 bg-[#4FD1C5]"
-                        : "w-2 bg-gray-500 hover:bg-gray-400"
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* 文章列表和侧边栏 */}
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* 文章列表 */}
-            <div className="lg:col-span-2">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">最新文章</h2>
-                <div className="h-px flex-1 bg-gradient-to-r from-[#4FD1C5] to-transparent ml-4"></div>
-              </div>
-
-              <div className="space-y-6">
-                {regularPosts.map((post) => (
-                  <div
-                    key={post.id}
-                    className="glass-card rounded-xl p-6 hover:border-[#4FD1C5]/30 transition-all group"
-                  >
-                    <div className="flex items-start space-x-4">
-                      <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                        <img
-                          src={post.image}
-                          alt={post.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="px-2 py-1 bg-[#4FD1C5]/10 text-[#4FD1C5] text-xs rounded-full">
-                            {post.category}
-                          </span>
-                          <span className="text-gray-500 text-xs">
-                            {post.date}
-                          </span>
-                          <span className="text-gray-500 text-xs">
-                            📖 {post.readTime}
-                          </span>
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-2 group-hover:text-[#4FD1C5] transition">
-                          {post.title}
-                        </h3>
-                        <p className="text-gray-400 text-sm mb-3 line-clamp-2">
-                          {post.excerpt}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3 text-xs text-gray-500">
-                            <span>❤️ {post.likes}</span>
-                            <span>💬 {post.comments}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {post.tags.slice(0, 2).map((tag, i) => (
-                              <span key={i} className="text-xs text-[#4FD1C5]">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* 加载更多 */}
-              <div className="mt-8 text-center">
-                <button className="px-6 py-3 bg-[#1A1F2E] border border-[#4FD1C5]/30 rounded-xl text-[#4FD1C5] hover:bg-[#4FD1C5] hover:text-[#0B0F1C] transition-all">
-                  加载更多文章
-                </button>
-              </div>
             </div>
 
-            {/* 侧边栏 */}
-            <div className="space-y-6">
-              {/* 作者卡片 */}
-              <div className="glass-card rounded-xl p-6">
-                <div className="text-center mb-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-[#4FD1C5] to-[#9F7AEA] rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-3xl">👨‍💻</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-white">冯行</h3>
-                  <p className="text-sm text-gray-400">React 前端开发工程师</p>
-                </div>
-                <div className="space-y-2 text-sm text-gray-300">
-                  <p className="flex items-center">
-                    <span className="w-16 text-gray-500">经验：</span>
-                    <span>3年 React 开发</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="w-16 text-gray-500">专注：</span>
-                    <span>React / TypeScript / Next.js</span>
-                  </p>
-                  <p className="flex items-center">
-                    <span className="w-16 text-gray-500">文章：</span>
-                    <span>{extendedPostsData.length} 篇</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* 热门标签 */}
-              <div className="glass-card rounded-xl p-6">
-                <h3 className="text-lg font-bold text-white mb-4">热门标签</h3>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    "React",
-                    "TypeScript",
-                    "Next.js",
-                    "性能优化",
-                    "源码",
-                    "Hooks",
-                    "状态管理",
-                    "动画",
-                    "测试",
-                    "架构",
-                  ].map((tag, i) => (
-                    <span
-                      key={i}
-                      className="px-3 py-1 bg-[#2A2F3E] text-gray-300 text-sm rounded-full hover:bg-[#4FD1C5] hover:text-[#0B0F1C] cursor-pointer transition"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
+            <div className="p5-hero__kvrow flex flex-col lg:flex-row gap-8 lg:gap-12 items-center lg:items-start mt-8">
+              <div className="flex-1 w-full max-w-lg space-y-5 text-center lg:text-left">
+                <P5Img
+                  path="/resources/img/top/fv_copy1_569d70b8e47b1f691605a7104ba6783a.png"
+                  alt="以意志夺取。"
+                  className="mx-auto lg:mx-0 max-w-full h-auto drop-shadow-lg"
+                  loading="eager"
+                />
+                <P5Img
+                  path="/resources/img/top/fv_copy2_809c34d071e7bf47e8dd8f505a3446de.png"
+                  alt="女神异闻录5 皇家版"
+                  className="mx-auto lg:mx-0 max-w-full h-auto"
+                  loading="eager"
+                />
+                <div className="flex flex-wrap gap-3 justify-center lg:justify-start pt-2">
+                  <a
+                    href="https://www.youtube.com/watch?v=A0_BMZivKRc&autoplay=1&rel=0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p5-btn-skew p5-btn-skew--ghost"
+                  >
+                    <span className="p5-btn-skew__text">宣传 PV</span>
+                  </a>
+                  <a
+                    href={`${P5}/shopguide/`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p5-btn-skew p5-btn-skew--solid"
+                  >
+                    <span className="p5-btn-skew__text">官网购买指引</span>
+                  </a>
                 </div>
               </div>
-
-              {/* 订阅卡片 */}
-              <div className="glass-card bg-gradient-to-br from-[#1A1F2E] to-[#2A2F3E] rounded-xl p-6">
-                <h3 className="text-lg font-bold text-white mb-2">订阅更新</h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  每周精选技术文章，第一时间送达
-                </p>
-                <SubscribeForm
-                  inputPlaceholder="your@email.com"
-                  buttonText="订阅"
-                  className="space-y-3"
-                  inputClassName="w-full bg-[#0B0F1C] border border-[#4FD1C5]/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-[#4FD1C5] transition"
-                  buttonClassName="w-full bg-[#4FD1C5] text-[#0B0F1C] font-medium py-2 rounded-lg hover:bg-[#3BB5A9] transition"
+              <div className="shrink-0 w-full max-w-sm flex flex-col items-center gap-4">
+                <P5Img
+                  path="/resources/img/top/spec_logo_0588e36582e0b170942092a8220a95e6.png"
+                  alt="P5 THE ROYAL"
+                  className="w-48 md:w-56 opacity-95"
+                  loading="eager"
+                />
+                <P5Img
+                  path="/resources/img/top/fv_release_date_4af2066228eaf3e4b21d3b678a4a7974.png"
+                  alt="热销中"
+                  className="max-w-xs w-full"
+                  loading="lazy"
                 />
               </div>
             </div>
           </div>
         </section>
 
-        {/* 底部 */}
-        <footer className="mt-16 border-t border-[#4FD1C5]/10">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
-              <p>© 2024 冯行的技术博客 · 分享 React 技术实践</p>
-              <div className="flex items-center space-x-4 mt-4 md:mt-0">
-                <span className="hover:text-[#4FD1C5] cursor-pointer">
-                  ⚛️ React
+        {/* —— 塔罗牌风：阿尔卡那展示（导航：怪盗） —— */}
+        <section
+          id="phantom"
+          className="p5-tarot-section scroll-mt-24 py-14 md:py-20 border-t border-red-600/35 bg-gradient-to-b from-zinc-950 via-black to-black"
+        >
+          <div className="p5r-wrapper">
+            <header className="p5-section-head mb-10 md:mb-14">
+              <span className="p5-section-head__tag">VELVET · ARCANA</span>
+              <h2 className="p5-section-head__title">塔罗印记</h2>
+              <p className="p5-section-head__desc">
+                以阿尔卡那为骨架，拼出《女神异闻录5》的叙事节奏——启程、契约、命运与谎言。
+              </p>
+            </header>
+            <div className="p5-tarot-grid">
+              {tarotShowcase.map((t) => (
+                <TarotCard key={t.roman + t.arcana} {...t} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* —— 主人公档案（导航：角色） —— */}
+        <section
+          id="character"
+          className="p5-protag-section scroll-mt-24 py-14 md:py-20 border-t border-amber-700/30 bg-black"
+        >
+          <div className="p5r-wrapper">
+            <header className="p5-section-head mb-10 md:mb-12">
+              <span className="p5-section-head__tag">PHANTOM · CAST</span>
+              <h2 className="p5-section-head__title">角色档案</h2>
+              <p className="p5-section-head__desc">
+                主人公、芳泽霞、摩尔加纳与心理助教丸喜——左右滑动或点击圆点切换。
+              </p>
+            </header>
+
+            <div className="p5-char-carousel">
+              <button
+                type="button"
+                className="p5-char-carousel__arrow p5-char-carousel__arrow--prev"
+                aria-label="上一位角色"
+                onClick={() =>
+                  setCharIdx(
+                    (i) =>
+                      (i - 1 + characterSlides.length) % characterSlides.length,
+                  )
+                }
+              >
+                <span className="p5-char-carousel__arrow-text" aria-hidden>
+                  ‹
                 </span>
-                <span className="hover:text-[#4FD1C5] cursor-pointer">
-                  📘 TypeScript
+              </button>
+              <button
+                type="button"
+                className="p5-char-carousel__arrow p5-char-carousel__arrow--next"
+                aria-label="下一位角色"
+                onClick={() =>
+                  setCharIdx((i) => (i + 1) % characterSlides.length)
+                }
+              >
+                <span className="p5-char-carousel__arrow-text" aria-hidden>
+                  ›
                 </span>
-                <span className="hover:text-[#4FD1C5] cursor-pointer">
-                  ▲ Next.js
-                </span>
+              </button>
+
+              <div className="p5-protag-layout p5-char-carousel__panel">
+                <div className="p5-protag-copy">
+                  <div className="p5-protag-badge">
+                    <span className="p5-protag-badge__en">
+                      {currentChar.codename}
+                    </span>
+                    <span className="p5-protag-badge__zh">
+                      {currentChar.nameLine}
+                    </span>
+                  </div>
+                  <p className="p5-protag-sub">{currentChar.subLine}</p>
+                  <div className="p5-protag-lines">
+                    {currentChar.paragraphs.map((p, idx) => (
+                      <p key={`${currentChar.id}-${idx}`}>{p}</p>
+                    ))}
+                  </div>
+                  <p className="p5-protag-quote">{currentChar.quote}</p>
+                </div>
+                <div className="p5-protag-visual">
+                  <div
+                    key={currentChar.id}
+                    className="p5-protag-visual__skew p5-char-carousel__visual"
+                  >
+                    <P5Img
+                      path={currentChar.image}
+                      alt={currentChar.nameLine}
+                      className="p5-protag-visual__img"
+                      loading="lazy"
+                    />
+                    <div className="p5-protag-visual__scan" aria-hidden />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p5-char-carousel__dots">
+                {characterSlides.map((c, i) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    aria-label={`查看 ${c.nameLine}`}
+                    aria-current={i === charIdx ? "true" : undefined}
+                    onClick={() => setCharIdx(i)}
+                    className={`p5-char-carousel__dot ${
+                      i === charIdx ? "p5-char-carousel__dot--active" : ""
+                    }`}
+                  />
+                ))}
               </div>
             </div>
           </div>
-        </footer>
+        </section>
+
+        {/* —— 游戏截图轮播（导航：特别） —— */}
+        <section
+          id="special"
+          className="p5-gallery-section scroll-mt-24 py-14 md:py-20 border-t border-red-500/25 bg-zinc-950/80"
+        >
+          <div className="p5r-wrapper max-w-[min(100%,1420px)]">
+            <header className="p5-section-head mb-8 md:mb-10 text-center">
+              <span className="p5-section-head__tag">GALLERY</span>
+              <h2 className="p5-section-head__title">游戏瞬间</h2>
+              <p className="p5-section-head__desc mx-auto">
+                宽屏为三图横排（左·中·右），箭头夹在接缝处；窄屏为单图、左右切换。侧图可点选切到该张。
+              </p>
+            </header>
+
+            <div className="p5-gallery">
+              {/* 官网风：三图横排 + z/y 夹在左|中、中|右 接缝处（大屏）；小屏单图 + 两侧箭头 */}
+              <div className="p5-gallery__stage">
+                <div
+                  className="p5-gallery__jagged p5-gallery__jagged--tl"
+                  aria-hidden
+                />
+                <div
+                  className="p5-gallery__jagged p5-gallery__jagged--br"
+                  aria-hidden
+                />
+
+                <div className="p5-gallery__triple-wrap">
+                  <div className="p5-gallery__triple">
+                    <button
+                      type="button"
+                      className="p5-gallery__thumb p5-gallery__thumb--side"
+                      onClick={() => setCarouselIdx(galleryPrevI)}
+                      aria-label={`查看上一张：${galleryCaptions[galleryPrevI] ?? ""}`}
+                    >
+                      <P5Img
+                        path={carouselSlides[galleryPrevI].tmb}
+                        alt=""
+                        className="p5-gallery__thumb-img"
+                        loading="lazy"
+                      />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="p5-gallery__arrow-btn p5-gallery__arrow-btn--prev"
+                      aria-label="上一张"
+                      onClick={() =>
+                        setCarouselIdx(
+                          (i) =>
+                            (i - 1 + carouselSlides.length) %
+                            carouselSlides.length,
+                        )
+                      }
+                    >
+                      <P5Img
+                        path="/resources/img/sp/top/z.png"
+                        alt=""
+                        className="p5-gallery__arrow-png"
+                        draggable={false}
+                        loading="eager"
+                      />
+                    </button>
+
+                    <div className="p5-gallery__thumb p5-gallery__thumb--center">
+                      <P5Img
+                        path={carouselSlides[carouselIdx].tmb}
+                        alt={galleryCaptions[carouselIdx] ?? `游戏截图 ${carouselIdx + 1}`}
+                        className="p5-gallery__thumb-img p5-gallery__thumb-img--center"
+                        loading="eager"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      className="p5-gallery__arrow-btn p5-gallery__arrow-btn--next"
+                      aria-label="下一张"
+                      onClick={() =>
+                        setCarouselIdx(
+                          (i) => (i + 1) % carouselSlides.length,
+                        )
+                      }
+                    >
+                      <P5Img
+                        path="/resources/img/sp/top/y.png"
+                        alt=""
+                        className="p5-gallery__arrow-png"
+                        draggable={false}
+                        loading="eager"
+                      />
+                    </button>
+
+                    <button
+                      type="button"
+                      className="p5-gallery__thumb p5-gallery__thumb--side"
+                      onClick={() => setCarouselIdx(galleryNextI)}
+                      aria-label={`查看下一张：${galleryCaptions[galleryNextI] ?? ""}`}
+                    >
+                      <P5Img
+                        path={carouselSlides[galleryNextI].tmb}
+                        alt=""
+                        className="p5-gallery__thumb-img"
+                        loading="lazy"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <p className="p5-gallery__caption mt-6 text-center text-sm md:text-base text-zinc-300 min-h-[3rem] px-4 leading-relaxed">
+                {cap}
+              </p>
+
+              <div className="flex justify-center gap-2 mt-5 flex-wrap">
+                {carouselSlides.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`第 ${i + 1} 张`}
+                    aria-current={i === carouselIdx ? "true" : undefined}
+                    onClick={() => setCarouselIdx(i)}
+                    className={`h-2 rounded-sm transition-all duration-300 ${
+                      i === carouselIdx
+                        ? "w-10 bg-red-500 skew-x-[-8deg]"
+                        : "w-2 bg-zinc-600 hover:bg-zinc-500"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* —— 简讯 —— */}
+        <section
+          id="news"
+          className="information p5r-information py-12 md:py-14 border-t border-red-900/30"
+        >
+          <div className="p5r-wrapper">
+            <div className="mb-6 text-center">
+              <P5Img
+                path="/resources/img/top/news_title_778961cf3e65f0731da400eefa38c6cd.png"
+                alt="NEWS"
+                className="inline-block max-w-[200px] md:max-w-none"
+                loading="lazy"
+              />
+            </div>
+            <div className="news-container">
+              <P5Img
+                path="/resources/img/top/news_bg_744932739a7f331e232f336d8acd1883.png"
+                alt=""
+                className="news-bg-img w-full h-auto opacity-95 block"
+                loading="lazy"
+              />
+              <ul className="news-box">
+                {newsItems.map((n) => (
+                  <li key={n.href}>
+                    <a href={n.href} target="_blank" rel="noopener noreferrer">
+                      <span className="news-date">{n.date}</span>
+                      <span className="news-text">{n.text}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* —— 校园剪影（导航：学生） —— */}
+        <section
+          id="student"
+          className="p5-companion scroll-mt-24 py-12 border-t border-red-900/25 bg-black"
+        >
+          <div className="p5r-wrapper">
+            <header className="p5-section-head mb-8 text-center">
+              <span className="p5-section-head__tag">ROYAL</span>
+              <h2 className="p5-section-head__title">第三学期 · 剪影</h2>
+            </header>
+            <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              <a
+                href={img(
+                  "/resources/img/top/ss/royal2_ss1_eaa581d6b9821bf165d3982350e1a5c4.jpg",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p5-companion__card group"
+              >
+                <P5Img
+                  path="/resources/img/top/tmb/royal2_ss1_5672c6da5d4cceac8377bfb42ebd681e.png"
+                  alt="陌生的青年"
+                  className="w-full border-2 border-amber-700/40 group-hover:border-red-500/70 transition-colors"
+                  loading="lazy"
+                />
+                <span className="p5-companion__label">未曾见过的展开</span>
+              </a>
+              <a
+                href={img(
+                  "/resources/img/top/ss/royal2_ss2_aa3972f69ff547d38e60f0b4787a038e.jpg",
+                )}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p5-companion__card group"
+              >
+                <P5Img
+                  path="/resources/img/top/tmb/royal2_ss2_637713189f6245a0f6fe92670aaaebfc.png"
+                  alt="初诣"
+                  className="w-full border-2 border-amber-700/40 group-hover:border-red-500/70 transition-colors"
+                  loading="lazy"
+                />
+                <span className="p5-companion__label">与伙伴的新回忆</span>
+              </a>
+            </div>
+          </div>
+        </section>
+
       </div>
+
+      <footer className="p5r-footer p5r-footer-official border-t border-red-900/40 bg-black py-10">
+        <div className="p5r-wrapper max-w-[900px]">
+          <nav
+            className="mt-4 pt-6 border-t border-zinc-800 text-center text-xs text-zinc-400 flex flex-wrap justify-center gap-x-4 gap-y-2"
+            aria-label="站内导航"
+          >
+            <Link to="/about" className="p5r-site-link">
+              自我介绍
+            </Link>
+            <Link to="/music" className="p5r-site-link">
+              音乐
+            </Link>
+            <Link to="/travel" className="p5r-site-link">
+              成长
+            </Link>
+            <Link to="/contact" className="p5r-site-link">
+              联系
+            </Link>
+            <Link to="/lovePage" className="p5r-site-link">
+              特别
+            </Link>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 };

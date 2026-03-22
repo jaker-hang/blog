@@ -1,0 +1,93 @@
+
+/* 新增的样式 */
+.first-view {
+    background: url('https://asia.sega.com/persona-remaster/p5r/cn/resources/img/p5r/fv_ab0c5ced14efdec6867ce9faf5ea6a92.png') no-repeat center;
+    background-size: cover;
+    height: 670px;
+    position: relative;
+}
+
+.first-view .content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.first-view .text {
+    color: #fff;
+    text-align: center;
+    z-index: 10;
+    position: relative;
+}
+
+.first-view .text h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.first-view .text p {
+    font-size: 24px;
+}
+
+.first-view .buttons {
+    margin-top: 20px;
+}
+
+.first-view .buttons .button {
+    background-color: #ff0000;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.first-view .buttons .button:last-child {
+    margin-right: 0;
+}
+
+.first-view .video-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.first-view .video-play img {
+    width: 50px;
+    height: 50px;
+}
+
+.now-on-sale {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    color: #fff;
+    font-size: 36px;
+    text-transform: uppercase;
+}
+
+.news-section {
+    background-color: #000;
+    color: #fff;
+    padding: 20px;
+}
+
+.news-section .news-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.news-section .news-item {
+    margin-bottom: 10px;
+}
