@@ -7,6 +7,11 @@ const P5MapBackground = () => {
   useEffect(() => {
     if (!containerRef.current) return undefined;
 
+    // 首次进入时避免立刻创建 full-screen canvas（React StrictMode 下会触发重复 init）。
+    // 尽量把初始化推迟到浏览器空闲后，让首屏先“稳住”。
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) return undefined;
+
     const sketch = (s) => {
       const stars = [];
       const STAR_COUNT = 24;
@@ -34,6 +39,8 @@ const P5MapBackground = () => {
         const canvas = s.createCanvas(s.windowWidth, s.windowHeight);
         canvas.parent(containerRef.current);
         canvas.style("display", "block");
+        // 降低动画刷新频率，减少首屏渲染/解码阶段的 CPU 占用
+        s.frameRate(30);
         for (let i = 0; i < STAR_COUNT; i += 1) stars.push(makeStar());
       };
 
@@ -104,9 +111,46 @@ const P5MapBackground = () => {
       };
     };
 
-    const instance = new p5(sketch);
+    let instance = null;
+    let cancelled = false;
+    let idleTimer = null;
+    let usedRequestIdleCallback = false;
+
+    const start = () => {
+      if (cancelled) return;
+      instance = new p5(sketch);
+    };
+
+    const scheduleInit = () => {
+      if (typeof window.requestIdleCallback === "function") {
+        usedRequestIdleCallback = true;
+        idleTimer = window.requestIdleCallback(() => start(), { timeout: 500 });
+        return;
+      }
+      idleTimer = window.setTimeout(() => start(), 200);
+    };
+
+    const onVisibilityChange = () => {
+      if (!instance) return;
+      if (document.hidden) instance.noLoop();
+      else instance.loop();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    scheduleInit();
+
     return () => {
-      instance.remove();
+      cancelled = true;
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      if (idleTimer != null) {
+        if (usedRequestIdleCallback && typeof window.cancelIdleCallback === "function") {
+          window.cancelIdleCallback(idleTimer);
+        } else {
+          window.clearTimeout(idleTimer);
+        }
+      }
+      instance?.remove();
+      instance = null;
     };
   }, []);
 

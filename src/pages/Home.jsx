@@ -98,7 +98,7 @@ const Home = () => {
               <span className="p5-section-head__tag">VELVET · ARCANA</span>
               <h2 className="p5-section-head__title">塔罗印记</h2>
             </header>
-            <P5TarotCarousel scrollRevealed={tarotVisible} />
+            {tarotVisible ? <P5TarotCarousel scrollRevealed={tarotVisible} /> : null}
           </div>
         </section>
 
@@ -116,8 +116,7 @@ const Home = () => {
                 心之怪盗团全员——点击下方角色按钮切换。
               </p>
             </header>
-
-            <P5CharacterArchive />
+            {charVisible ? <P5CharacterArchive /> : null}
           </div>
         </section>
 
@@ -136,123 +135,125 @@ const Home = () => {
               </p>
             </header>
 
-            <div className="p5-gallery">
-              {/* 官网风：三图横排 + z/y 夹在左|中、中|右 接缝处（大屏）；小屏单图 + 两侧箭头 */}
-              <div className="p5-gallery__stage">
-                <div
-                  className="p5-gallery__jagged p5-gallery__jagged--tl"
-                  aria-hidden
-                />
-                <div
-                  className="p5-gallery__jagged p5-gallery__jagged--br"
-                  aria-hidden
-                />
+            {galleryVisible ? (
+              <div className="p5-gallery">
+                {/* 官网风：三图横排 + z/y 夹在左|中、中|右 接缝处（大屏）；小屏单图 + 两侧箭头 */}
+                <div className="p5-gallery__stage">
+                  <div
+                    className="p5-gallery__jagged p5-gallery__jagged--tl"
+                    aria-hidden
+                  />
+                  <div
+                    className="p5-gallery__jagged p5-gallery__jagged--br"
+                    aria-hidden
+                  />
 
-                <div className="p5-gallery__triple-wrap">
-                  <div className="p5-gallery__triple">
-                    <button
-                      type="button"
-                      className="p5-gallery__thumb p5-gallery__thumb--side"
-                      onClick={() => setCarouselIdx(galleryPrevI)}
-                      aria-label={`查看上一张：${galleryCaptions[galleryPrevI] ?? ""}`}
-                    >
-                      <P5Img
-                        path={carouselSlides[galleryPrevI].tmb}
-                        alt=""
-                        className="p5-gallery__thumb-img"
-                        loading="lazy"
-                      />
-                    </button>
+                  <div className="p5-gallery__triple-wrap">
+                    <div className="p5-gallery__triple">
+                      <button
+                        type="button"
+                        className="p5-gallery__thumb p5-gallery__thumb--side"
+                        onClick={() => setCarouselIdx(galleryPrevI)}
+                        aria-label={`查看上一张：${galleryCaptions[galleryPrevI] ?? ""}`}
+                      >
+                        <P5Img
+                          path={carouselSlides[galleryPrevI].tmb}
+                          alt=""
+                          className="p5-gallery__thumb-img"
+                          loading="lazy"
+                        />
+                      </button>
 
-                    <button
-                      type="button"
-                      className="p5-gallery__arrow-btn p5-gallery__arrow-btn--prev"
-                      aria-label="上一张"
-                      onClick={() =>
-                        setCarouselIdx(
-                          (i) =>
-                            (i - 1 + carouselSlides.length) %
-                            carouselSlides.length,
-                        )
-                      }
-                    >
-                      <P5Img
-                        path="/resources/img/sp/top/z.png"
-                        alt=""
-                        className="p5-gallery__arrow-png"
-                        draggable={false}
-                        loading="eager"
-                      />
-                    </button>
-
-                    <div className="p5-gallery__thumb p5-gallery__thumb--center">
-                      <P5Img
-                        key={galleryAnimKey}
-                        path={carouselSlides[carouselIdx].tmb}
-                        alt={
-                          galleryCaptions[carouselIdx] ??
-                          `游戏截图 ${carouselIdx + 1}`
+                      <button
+                        type="button"
+                        className="p5-gallery__arrow-btn p5-gallery__arrow-btn--prev"
+                        aria-label="上一张"
+                        onClick={() =>
+                          setCarouselIdx(
+                            (i) =>
+                              (i - 1 + carouselSlides.length) %
+                              carouselSlides.length,
+                          )
                         }
-                        className="p5-gallery__thumb-img p5-gallery__thumb-img--center p5-gallery__thumb-img--center-anim"
-                        loading="eager"
-                      />
+                      >
+                        <P5Img
+                          path="/resources/img/sp/top/z.png"
+                          alt=""
+                          className="p5-gallery__arrow-png"
+                          draggable={false}
+                          loading="eager"
+                        />
+                      </button>
+
+                      <div className="p5-gallery__thumb p5-gallery__thumb--center">
+                        <P5Img
+                          key={galleryAnimKey}
+                          path={carouselSlides[carouselIdx].tmb}
+                          alt={
+                            galleryCaptions[carouselIdx] ??
+                            `游戏截图 ${carouselIdx + 1}`
+                          }
+                          className="p5-gallery__thumb-img p5-gallery__thumb-img--center p5-gallery__thumb-img--center-anim"
+                          loading="eager"
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        className="p5-gallery__arrow-btn p5-gallery__arrow-btn--next"
+                        aria-label="下一张"
+                        onClick={() =>
+                          setCarouselIdx((i) => (i + 1) % carouselSlides.length)
+                        }
+                      >
+                        <P5Img
+                          path="/resources/img/sp/top/y.png"
+                          alt=""
+                          className="p5-gallery__arrow-png"
+                          draggable={false}
+                          loading="eager"
+                        />
+                      </button>
+
+                      <button
+                        type="button"
+                        className="p5-gallery__thumb p5-gallery__thumb--side"
+                        onClick={() => setCarouselIdx(galleryNextI)}
+                        aria-label={`查看下一张：${galleryCaptions[galleryNextI] ?? ""}`}
+                      >
+                        <P5Img
+                          path={carouselSlides[galleryNextI].tmb}
+                          alt=""
+                          className="p5-gallery__thumb-img"
+                          loading="lazy"
+                        />
+                      </button>
                     </div>
-
-                    <button
-                      type="button"
-                      className="p5-gallery__arrow-btn p5-gallery__arrow-btn--next"
-                      aria-label="下一张"
-                      onClick={() =>
-                        setCarouselIdx((i) => (i + 1) % carouselSlides.length)
-                      }
-                    >
-                      <P5Img
-                        path="/resources/img/sp/top/y.png"
-                        alt=""
-                        className="p5-gallery__arrow-png"
-                        draggable={false}
-                        loading="eager"
-                      />
-                    </button>
-
-                    <button
-                      type="button"
-                      className="p5-gallery__thumb p5-gallery__thumb--side"
-                      onClick={() => setCarouselIdx(galleryNextI)}
-                      aria-label={`查看下一张：${galleryCaptions[galleryNextI] ?? ""}`}
-                    >
-                      <P5Img
-                        path={carouselSlides[galleryNextI].tmb}
-                        alt=""
-                        className="p5-gallery__thumb-img"
-                        loading="lazy"
-                      />
-                    </button>
                   </div>
                 </div>
-              </div>
 
-              <p className="p5-gallery__caption mt-6 text-center text-sm md:text-base text-zinc-300 min-h-[3rem] px-4 leading-relaxed">
-                {cap}
-              </p>
+                <p className="p5-gallery__caption mt-6 text-center text-sm md:text-base text-zinc-300 min-h-[3rem] px-4 leading-relaxed">
+                  {cap}
+                </p>
 
-              <div className="flex justify-center gap-2 mt-5 flex-wrap">
-                {carouselSlides.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    aria-label={`第 ${i + 1} 张`}
-                    aria-current={i === carouselIdx ? "true" : undefined}
-                    onClick={() => setCarouselIdx(i)}
-                    className={`h-2 rounded-sm transition-all duration-300 ${
-                      i === carouselIdx
-                        ? "w-10 bg-red-500 skew-x-[-8deg]"
-                        : "w-2 bg-zinc-600 hover:bg-zinc-500"
-                    }`}
-                  />
-                ))}
+                <div className="flex justify-center gap-2 mt-5 flex-wrap">
+                  {carouselSlides.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      aria-label={`第 ${i + 1} 张`}
+                      aria-current={i === carouselIdx ? "true" : undefined}
+                      onClick={() => setCarouselIdx(i)}
+                      className={`h-2 rounded-sm transition-all duration-300 ${
+                        i === carouselIdx
+                          ? "w-10 bg-red-500 skew-x-[-8deg]"
+                          : "w-2 bg-zinc-600 hover:bg-zinc-500"
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
           </div>
         </section>
 

@@ -128,31 +128,35 @@ export default function P5CharacterArchive() {
                 className="p5-chara-archive__imgs"
                 style={{ backgroundImage: `url(${BG_SLIDER})` }}
               >
-                <P5Img
-                  path={`${CHARA_BASE}/chara_star.png`}
-                  alt=""
-                  className="charastar"
-                />
-                <P5Img
-                  path={chara.kaitouImg}
-                  alt=""
-                  className={
-                    chara.isNavi ? "Naviimg" : "kaitouimg"
-                  }
-                />
-                <P5Img
-                  path={chara.personaImg}
-                  alt=""
-                  className={
-                    chara.isNavi ? "Necronomiconimg" : "personaimg"
-                  }
-                />
-                <P5Img
-                  path={chara.charaName}
-                  alt=""
-                  className="charaname"
-                />
-                <h2 style={{marginTop: "20px"}} >{chara.desc}</h2>
+                {idx === activeIdx ? (
+                  <>
+                    <P5Img
+                      path={`${CHARA_BASE}/chara_star.png`}
+                      alt=""
+                      className="charastar"
+                    />
+                    <P5Img
+                      path={chara.kaitouImg}
+                      alt=""
+                      className={chara.isNavi ? "Naviimg" : "kaitouimg"}
+                    />
+                    <P5Img
+                      path={chara.personaImg}
+                      alt=""
+                      className={
+                        chara.isNavi
+                          ? "Necronomiconimg"
+                          : "personaimg"
+                      }
+                    />
+                    <P5Img
+                      path={chara.charaName}
+                      alt=""
+                      className="charaname"
+                    />
+                    <h2 style={{ marginTop: "20px" }}>{chara.desc}</h2>
+                  </>
+                ) : null}
               </div>
             </div>
           ))}

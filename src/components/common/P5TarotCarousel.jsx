@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import P5Img from "./P5Img";
-import { img as p5img } from "../../data/p5rHomeData";
 import { tarotCards, TAROT_CARD_BACK } from "../../data/tarotCardsData";
 import "./P5TarotCarousel.css";
 
@@ -33,10 +32,22 @@ function TarotFlipCard({ card, backPath, revealed, index }) {
       <div className="p5-tarot-flip-card__inner">
         {/* 初始：展示卡面；翻转后：展示卡背（反个面） */}
         <div className="p5-tarot-flip-card__face p5-tarot-flip-card__face--back">
-          <img src={p5img(card.face)} alt={card.arcana} />
+          <P5Img
+            path={card.face}
+            alt={card.arcana}
+            loading="lazy"
+            draggable={false}
+            fetchPriority="low"
+          />
         </div>
         <div className="p5-tarot-flip-card__face p5-tarot-flip-card__face--front">
-          <img src={p5img(backPath)} alt="卡背" />
+          <P5Img
+            path={backPath}
+            alt="卡背"
+            loading="lazy"
+            draggable={false}
+            fetchPriority="low"
+          />
         </div>
       </div>
     </article>
