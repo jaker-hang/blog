@@ -1,0 +1,177 @@
+/* 复刻用户提供的 Card Swiper 效果：堆叠卡片 + 鼠标/触摸拖拽滑出 */
+
+.p5-tarot-swipe {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem 0 0.5rem;
+  position: relative;
+}
+
+.p5-tarot-swipe__stage {
+  width: min(520px, 92vw);
+  aspect-ratio: 2 / 3;
+  height: auto;
+  perspective: 1000px;
+  perspective-origin: center 50%;
+  transform-style: preserve-3d;
+  position: relative;
+  user-select: none;
+}
+
+.p5-tarot-swipe__stage--revealed {
+  animation: p5r-tarot-swiper-in 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes p5r-tarot-swiper-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+    filter: brightness(1.2) contrast(1.05);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: brightness(1) contrast(1);
+  }
+}
+
+.p5-tarot-swipe__card {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  border-radius: 18px;
+  overflow: hidden;
+  transform: translateZ(calc(-30px * var(--i))) translateY(calc(-20px * var(--i))) rotate(calc(-4deg * var(--i)));
+  filter: drop-shadow(2px 2px 20px rgba(0, 0, 0, 0.5));
+  cursor: pointer;
+  touch-action: none;
+  transition: transform 0.5s;
+  will-change: transform;
+}
+
+.p5-tarot-swipe__drag {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+  transition: transform 0.5s;
+  will-change: transform;
+}
+
+.p5-tarot-swipe__flip {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.p5-tarot-swipe__flip--flipped {
+  transform: rotateY(180deg);
+}
+
+.p5-tarot-swipe__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.p5-tarot-swipe__face--front {
+  transform: rotateY(0deg);
+}
+
+.p5-tarot-swipe__face--back {
+  transform: rotateY(180deg);
+}
+
+.p5-tarot-swipe__img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  background: #000;
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
+}
+
+.p5-tarot-swipe__icon {
+  font-size: 10vh;
+  border-radius: 999px;
+  padding: 20px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  animation-name: p5-tarot-swipe__pulse1;
+  animation-duration: 900ms;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: both;
+  animation-play-state: paused;
+  pointer-events: none;
+  user-select: none;
+}
+
+.p5-tarot-swipe__icon--like {
+  left: -0.5rem;
+  color: #ef4444;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.p5-tarot-swipe__icon--like::before {
+  content: "♥";
+}
+
+.p5-tarot-swipe__icon--dislike {
+  right: -0.5rem;
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.p5-tarot-swipe__icon--dislike::before {
+  content: "✕";
+}
+
+.p5-tarot-swipe__icon--trigger {
+  animation-name: p5-tarot-swipe__pulse2;
+  animation-play-state: running;
+}
+
+@keyframes p5-tarot-swipe__pulse1 {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes p5-tarot-swipe__pulse2 {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .p5-tarot-swipe__icon {
+    font-size: 7vh;
+  }
+  .p5-tarot-swipe__stage {
+    width: min(560px, 92vw);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p5-tarot-swipe__stage--revealed {
+    animation: none;
+  }
+  .p5-tarot-swipe__icon {
+    animation: none;
+  }
+}
+

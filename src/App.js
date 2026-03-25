@@ -46,7 +46,7 @@ function FullScreenWrapper({ children }) {
       ) : (
         <div
           className={`relative flex flex-col min-h-screen p5-theme ${
-            isHomePage ? "bg-black" : "app-main-bg"
+            isHomePage ? "bg-transparent" : "app-main-bg"
           }`}
         >
           {!isHomePage && <P5MapBackground />}

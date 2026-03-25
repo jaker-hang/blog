@@ -39,15 +39,75 @@
 
 .p5r-page {
   min-height: 100vh;
+  position: relative;
+}
+
+/* P5 风格全页背景：半透明叠在 P5MapBackground 之上，保留动态画布效果 */
+.p5-home-redesign::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(
+      -12deg,
+      transparent 0,
+      transparent 2px,
+      rgba(180, 20, 30, 0.03) 2px,
+      rgba(180, 20, 30, 0.03) 4px
+    ),
+    radial-gradient(
+      ellipse 120% 80% at 50% 20%,
+      rgba(30, 5, 10, 0.5),
+      transparent 55%
+    ),
+    rgba(5, 5, 8, 0.45);
+  pointer-events: none;
+}
+
+.p5-home-redesign::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background-image: radial-gradient(
+    2px 2px at 24px 36px,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  background-size: 96px 96px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 各区块半透明背景，不遮挡 P5 动态画布 */
+.p5-tarot-section {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.p5-protag-section {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.p5-gallery-section {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.p5r-information {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.p5-companion {
+  background: rgba(0, 0, 0, 0.25);
 }
 
 .p5r-kv-bg {
   background: radial-gradient(
       ellipse 80% 50% at 50% 0%,
-      rgba(80, 10, 20, 0.5) 0%,
+      rgba(60, 8, 16, 0.4) 0%,
       transparent 55%
     ),
-    #050508;
+    rgba(5, 5, 8, 0.6);
 }
 
 .p5r-bg-stars {
@@ -59,7 +119,7 @@
     transparent
   );
   background-size: 80px 80px;
-  opacity: 0.4;
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -106,11 +166,11 @@
 
   @keyframes p5r-kv-glow {
     from {
-      opacity: 0.62;
+      opacity: 0;
       filter: saturate(1);
     }
     to {
-      opacity: 0.92;
+      opacity: 0;
       filter: saturate(1.2);
     }
   }
@@ -132,10 +192,10 @@
 
   @keyframes p5r-stars-twinkle {
     from {
-      opacity: 0.26;
+      opacity: 0;
     }
     to {
-      opacity: 0.48;
+      opacity: 0;
     }
   }
 
@@ -212,6 +272,54 @@
     animation: p5r-pop-skew 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
   }
 }
+
+/* ========== 滚动入场动画 ========== */
+.p5-section-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.p5-section-reveal.p5-section-reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p5-section-reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .p5-section-reveal.p5-section-reveal--visible .p5-section-head {
+    animation: p5r-pop-skew 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .p5-section-reveal.p5-section-reveal--visible .p5-tarot-carousel {
+    animation: p5r-pop-skew 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  }
+
+  .p5-section-reveal.p5-section-reveal--visible .p5-chara-archive {
+    animation: p5r-pop-skew 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  }
+
+  .p5-section-reveal.p5-section-reveal--visible .p5-gallery {
+    animation: p5r-pop-skew 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+  }
+
+  .p5-section-reveal.p5-section-reveal--visible .news-container {
+    animation: p5r-pop-skew 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+  }
+
+  .p5-companion.p5-section-reveal--visible .grid {
+    animation: p5r-pop-skew 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s both;
+  }
+}
+
 
 /* ========== 主页重设计：塔罗 / 主人公 / 画廊（静态样式） ========== */
 .p5-home-redesign .p5-hero__titleblock {
@@ -586,7 +694,7 @@
     rgba(0, 0, 0, 0.12) 3px
   );
   mix-blend-mode: multiply;
-  opacity: 0.5;
+  opacity: 0;
 }
 
 /* 游戏瞬间：官网式三图横排 + z/y 夹在图与图之间；半调红底 + 斜切装饰 */
@@ -597,22 +705,22 @@
 .p5-gallery__stage {
   position: relative;
   overflow: hidden;
-  border: 2px solid rgba(90, 10, 18, 0.95);
-  background-color: #120205;
+  border: 2px solid rgba(90, 10, 18, 0.7);
+  background-color: rgba(18, 2, 5, 0.75);
   background-image:
     radial-gradient(
       ellipse 95% 75% at 50% 35%,
-      rgba(185, 28, 28, 0.28),
+      rgba(140, 20, 28, 0.25),
       transparent 58%
     ),
-    radial-gradient(circle, rgba(0, 0, 0, 0.55) 1px, transparent 1px);
+    radial-gradient(circle, rgba(0, 0, 0, 0.4) 1px, transparent 1px);
   background-size:
     100% 100%,
     5px 5px;
   padding: 1rem 0.85rem 1.1rem;
   box-shadow:
-    inset 0 0 120px rgba(0, 0, 0, 0.92),
-    0 0 0 1px rgba(0, 0, 0, 0.9);
+    inset 0 0 80px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.5);
 }
 
 .p5-gallery__stage::before {
@@ -639,7 +747,7 @@
     rgba(0, 0, 0, 0.92) 0%,
     rgba(40, 0, 10, 0.65) 100%
   );
-  opacity: 0.9;
+  opacity: 0;
 }
 
 .p5-gallery__jagged--tl {
@@ -724,6 +832,32 @@
 .p5-gallery__thumb-img--center {
   min-height: 200px;
   max-height: min(58vh, 580px);
+}
+
+/* 中图切换镜头拉近（当 carouselIdx 改变时通过 key + 类触发） */
+.p5-gallery__thumb-img--center-anim {
+  animation: p5r-gallery-center-pop 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes p5r-gallery-center-pop {
+  from {
+    transform: scale(0.98) translateY(6px);
+    filter: brightness(0.98) saturate(1.05);
+  }
+  60% {
+    transform: scale(1.02) translateY(-1px);
+    filter: brightness(1.12) saturate(1.18);
+  }
+  to {
+    transform: scale(1) translateY(0);
+    filter: brightness(1.06) saturate(1.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p5-gallery__thumb-img--center-anim {
+    animation: none;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -954,6 +1088,100 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+/* 预告信（P5 风格） */
+.p5-calling-card-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 1.75rem;
+  max-width: 900px;
+}
+
+.p5-calling-card-wrap--hero {
+  margin: 1rem auto 0;
+  max-width: 640px;
+}
+
+.p5-calling-card {
+  position: relative;
+  width: min(560px, 92vw);
+  transform: skewX(-6deg) rotate(-1deg);
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.p5-calling-card:hover {
+  transform: skewX(-6deg) rotate(-1deg) scale(1.01);
+  filter: brightness(1.05);
+}
+
+.p5-calling-card__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 2px solid rgba(239, 68, 68, 0.35);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.75),
+    0 0 30px rgba(239, 68, 68, 0.12),
+    inset 0 0 50px rgba(239, 68, 68, 0.08);
+}
+
+.p5-calling-card__label {
+  position: absolute;
+  left: 7%;
+  top: 8%;
+  transform: skewX(6deg);
+  font-family: "Bebas Neue", "Oswald", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #fff;
+  font-size: 1rem;
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+}
+
+.p5-calling-card__scan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 10px;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 40%,
+    rgba(248, 113, 113, 0.22) 55%,
+    transparent 70%
+  );
+  opacity: 0.0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .p5-calling-card__scan {
+    opacity: 0.35;
+    animation: p5-calling-scan 2.6s ease-in-out infinite;
+  }
+
+  @keyframes p5-calling-scan {
+    0% {
+      transform: translateX(-18%) translateY(0);
+      opacity: 0;
+    }
+    12% {
+      opacity: 0.28;
+    }
+    55% {
+      opacity: 0.2;
+    }
+    100% {
+      transform: translateX(18%) translateY(0);
+      opacity: 0;
+    }
   }
 }
 

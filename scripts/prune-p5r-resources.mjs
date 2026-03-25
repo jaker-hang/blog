@@ -14,7 +14,6 @@ const RES = path.join(PUBLIC, "resources");
 /** 相对 public/ 的路径 */
 const KEEP = new Set([
   "resources/img/top/bg_top_5349e1a376a081228afb8211dbfff169.png",
-  "resources/img/top/bg_red_line_fe82daa77927be565a03f46a0c7cbf04.png",
   "resources/img/top/fv_copy1_569d70b8e47b1f691605a7104ba6783a.png",
   "resources/img/top/fv_copy2_809c34d071e7bf47e8dd8f505a3446de.png",
   "resources/img/top/spec_logo_0588e36582e0b170942092a8220a95e6.png",

@@ -1,0 +1,94 @@
+/* 复刻你给的 3D 卡片轮播（只用于“塔罗印记”区块） */
+
+.p5-tarot-imprint-shell {
+  position: relative;
+  width: 60vw;
+  height: 40vw;
+  max-width: 380px;
+  max-height: 250px;
+  margin: 0 auto;
+  color: #fff;
+  perspective: 1000px;
+  transform-origin: center;
+  overflow: hidden;
+}
+
+.p5-tarot-imprint-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  transform-style: preserve-3d;
+  transform: translateZ(-30vw) rotateY(0);
+  animation: p5r-tarot-imprint-carousel 9s infinite
+    cubic-bezier(0.77, 0, 0.175, 1) forwards;
+  animation-play-state: paused;
+}
+
+.p5-tarot-imprint-content--run {
+  animation-play-state: running;
+}
+
+.p5-tarot-imprint-item {
+  position: absolute;
+  width: 60vw;
+  height: 40vw;
+  max-width: 380px;
+  max-height: 250px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  background-size: cover;
+  -webkit-box-reflect: below 25px -webkit-linear-gradient(
+    transparent 50%,
+    rgba(255, 255, 255, 0.3)
+  );
+  background-position: center;
+  background-repeat: no-repeat;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+@keyframes p5r-tarot-imprint-carousel {
+  0%,
+  17.5% {
+    transform: translateZ(-35vw) rotateY(0);
+  }
+
+  27.5%,
+  45% {
+    transform: translateZ(-35vw) rotateY(-120deg);
+  }
+
+  55%,
+  72.5% {
+    transform: translateZ(-35vw) rotateY(-240deg);
+  }
+
+  82.5%,
+  100% {
+    transform: translateZ(-35vw) rotateY(-360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p5-tarot-imprint-content {
+    animation: none;
+    animation-play-state: paused;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+

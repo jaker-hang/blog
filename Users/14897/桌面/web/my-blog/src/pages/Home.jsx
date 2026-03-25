@@ -20,14 +20,6 @@ const Home = () => {
             </div>
             <div className="now-on-sale">NOW ON SALE</div>
         </div>
-
-        {/* News Section */}
-        <section className="news-section">
-            <div className="news-title">NEWS</div>
-            <div className="news-item">
-                2022.06.13 《女神异闻录 5 皇家版》重制版将于2022年10月21日发售！
-            </div>
-        </section>
     );
 };
 

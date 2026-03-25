@@ -1,0 +1,211 @@
+/* P5 角色档案 - 来自 P5R 原始 styles.css */
+
+.p5-chara-archive {
+  z-index: 2;
+  min-height: 512px;
+}
+
+.p5-chara-archive__title {
+  height: 64px;
+  object-fit: contain;
+  position: absolute;
+  right: 80%;
+  bottom: 110%;
+  z-index: 3;
+}
+
+.p5-chara-archive__main {
+  position: relative;
+  width: 800px;
+  height: 512px;
+  margin: auto;
+  margin-top: 128px;
+}
+
+.p5-chara-archive__panels {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.p5-chara-archive__panel {
+  transition: opacity 0.5s ease-in-out;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.p5-chara-archive__panel.in {
+  opacity: 1;
+  z-index: 1;
+}
+
+.p5-chara-archive__panel.out {
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.p5-chara-archive__imgs {
+  display: flex;
+  position: relative;
+  width: 800px;
+  height: 512px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: auto;
+}
+
+.p5-chara-archive__imgs h2 {
+  color: white;
+  width: 400px;
+  text-align: left;
+  position: absolute;
+  left: 10%;
+  top: 15%;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: normal;
+}
+
+.p5-chara-archive__imgs .charastar {
+  position: absolute;
+  left: 60%;
+  height: 512px;
+}
+
+.p5-chara-archive__imgs .kaitouimg {
+  position: absolute;
+  left: 50%;
+  height: 400px;
+  margin-top: 128px;
+  z-index: 3;
+}
+
+.p5-chara-archive__imgs .personaimg {
+  position: absolute;
+  left: 80%;
+  height: 400px;
+  z-index: 2;
+}
+
+.p5-chara-archive__imgs .Naviimg {
+  position: absolute;
+  left: 60%;
+  height: 400px;
+  margin-top: 128px;
+  z-index: 3;
+}
+
+.p5-chara-archive__imgs .Necronomiconimg {
+  position: absolute;
+  left: 70%;
+  height: 256px;
+  z-index: 2;
+}
+
+.p5-chara-archive__imgs .charaname {
+  position: absolute;
+  right: 80%;
+  height: 128px;
+  margin-top: -32px;
+}
+
+.p5-chara-archive__changebar {
+  margin-top: 0;
+  margin-left: auto;
+  margin-right: auto;
+  height: 256px;
+  width: 1024px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.p5-chara-archive__changebar > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0;
+}
+
+.p5-chara-archive__btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  margin: 0;
+  line-height: 0;
+}
+
+.p5-chara-archive__btn img {
+  height: 128px;
+  width: auto;
+  opacity: 1;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.p5-chara-archive__btn:hover img {
+  opacity: 0.5;
+  transform: scale(1.2);
+}
+
+/* 响应式：窄屏时缩小 */
+@media (max-width: 1024px) {
+  .p5-chara-archive__main {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .p5-chara-archive__imgs {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .p5-chara-archive__changebar {
+    width: 100%;
+    max-width: 1024px;
+  }
+}
+
+@media (max-width: 640px) {
+  .p5-chara-archive__main {
+    margin-top: 64px;
+    height: auto;
+    min-height: 400px;
+  }
+
+  .p5-chara-archive__imgs {
+    height: 400px;
+    background-size: cover;
+  }
+
+  .p5-chara-archive__imgs h2 {
+    width: 45%;
+    font-size: 0.85rem;
+  }
+  .p5-chara-archive__imgs .charastar {
+    height: 400px;
+  }
+
+  .p5-chara-archive__imgs .kaitouimg,
+  .p5-chara-archive__imgs .Naviimg {
+    height: 300px;
+    margin-top: 64px;
+  }
+
+  .p5-chara-archive__imgs .personaimg,
+  .p5-chara-archive__imgs .Necronomiconimg {
+    height: 300px;
+  }
+
+  .p5-chara-archive__btn img {
+    height: 80px;
+  }
+}

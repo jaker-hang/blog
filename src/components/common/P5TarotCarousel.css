@@ -1,0 +1,202 @@
+/* P5 塔罗牌：每页展示 6 张 + 轮播切页，滚动到区域后有翻入动画 */
+
+.p5-tarot-carousel {
+  position: relative;
+  padding: 0 3rem 1.75rem;
+  max-width: 100%;
+}
+
+.p5-tarot-carousel__track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  gap: 1.1rem;
+  justify-content: center;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.p5-tarot-carousel__track {
+  padding: 0.25rem 0;
+}
+
+@media (max-width: 640px) {
+  .p5-tarot-carousel__track {
+    grid-template-columns: repeat(2, minmax(95px, 1fr));
+    gap: 0.9rem;
+    max-width: 520px;
+  }
+}
+
+/* 翻转卡牌 */
+.p5-tarot-flip-card {
+  aspect-ratio: 2/3;
+  min-height: 180px;
+  max-height: 270px;
+  perspective: 1000px;
+  cursor: pointer;
+  margin: 0 auto;
+  opacity: 0;
+  transform: rotateY(42deg) translateY(10px) scale(0.98);
+  filter: saturate(1.1) brightness(0.95);
+  transition:
+    opacity 0.5s ease,
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 滚动到视口时的翻转入场动画 */
+.p5-tarot-flip-card--revealed {
+  opacity: 1;
+  transform: rotateY(0deg) translateY(0) scale(1);
+  filter: saturate(1.15) brightness(1.05);
+  transition-delay: var(--flip-delay, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p5-tarot-flip-card {
+    opacity: 1;
+    transform: none;
+  }
+  .p5-tarot-flip-card--revealed {
+    opacity: 1;
+  }
+}
+
+.p5-tarot-flip-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.p5-tarot-flip-card--flipped .p5-tarot-flip-card__inner {
+  transform: rotateY(180deg);
+}
+
+.p5-tarot-flip-card__face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 2px solid rgba(220, 38, 38, 0.35);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.p5-tarot-flip-card__face--back {
+  background: #0a0a0a;
+}
+
+.p5-tarot-flip-card__face--front {
+  transform: rotateY(180deg);
+}
+
+/* 完整展示卡面（含顶部编号、插图、底部文字） */
+.p5-tarot-flip-card__face img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.p5-tarot-flip-card:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 3px;
+}
+
+.p5-tarot-flip-card:hover .p5-tarot-flip-card__face {
+  border-color: rgba(248, 113, 113, 0.6);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.6),
+    0 0 16px rgba(220, 38, 38, 0.15);
+}
+
+/* 翻入后的小幅“呼吸感”，更像游戏 UI */
+@media (prefers-reduced-motion: no-preference) {
+  .p5-tarot-flip-card--revealed:hover {
+    animation: p5r-tarot-breathe 1.1s ease-in-out infinite;
+  }
+
+  @keyframes p5r-tarot-breathe {
+    0% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-6px) scale(1.02);
+    }
+    100% {
+      transform: translateY(0) scale(1);
+    }
+  }
+}
+
+/* 箭头 */
+.p5-tarot-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.5rem;
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  z-index: 5;
+  transition: transform 0.2s ease, filter 0.2s ease;
+  filter: drop-shadow(0 0 8px rgba(255, 252, 240, 0.35))
+    drop-shadow(0 4px 16px rgba(0, 0, 0, 0.85));
+}
+
+.p5-tarot-carousel__arrow:hover {
+  transform: translateY(-50%) scale(1.08);
+  filter: drop-shadow(0 0 16px rgba(253, 224, 71, 0.7))
+    drop-shadow(0 6px 20px rgba(0, 0, 0, 0.95));
+}
+
+.p5-tarot-carousel__arrow--prev {
+  left: 0;
+}
+
+.p5-tarot-carousel__arrow--next {
+  right: 0;
+}
+
+/* 旧版箭头三角图标相关样式已不再使用 */
+
+/* 圆点 */
+.p5-tarot-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.p5-tarot-carousel__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  border: none;
+  padding: 0;
+  background: #52525b;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.p5-tarot-carousel__dot:hover {
+  background: #71717a;
+}
+
+.p5-tarot-carousel__dot--active {
+  width: 1.5rem;
+  border-radius: 999px;
+  background: #ef4444;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+}

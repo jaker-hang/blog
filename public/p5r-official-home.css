@@ -173,7 +173,7 @@
 /* footer */
 .p5r-official-root footer.p5r-footer-official {
   position: relative;
-  background: #000;
+  background: rgba(0, 0, 0, 0.35);
   padding: 3rem 1rem 4rem;
   z-index: 20;
 }

@@ -128,15 +128,6 @@ const Navbar = ({
               </Link>
             ))}
           </div>
-          <Link
-            to="/#buy"
-            onClick={() => setIsMenuOpen(false)}
-            className="p5-nav-buy w-full justify-center mb-6"
-          >
-            <span className="p5-nav-buy-inner">
-              立即购买 <span className="text-lg">→</span>
-            </span>
-          </Link>
           <p className="text-[10px] font-black text-red-500 tracking-[0.4em] mb-2">
             SITE
           </p>

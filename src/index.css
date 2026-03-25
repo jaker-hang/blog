@@ -1154,7 +1154,7 @@ html.p5-scene-shake #root {
   width: 0.5rem;
   height: 0.5rem;
   border-left: 2px solid white;
-  border-top: 2px solid white;
+  border-top: 0 solid white;
   opacity: 0.5;
 }
 
