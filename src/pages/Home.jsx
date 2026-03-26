@@ -294,6 +294,27 @@ const Home = () => {
         </section>
       </div>
 
+      {/* BGM：女神异闻录风格背景音乐（右下角悬浮） */}
+      <div className="fixed right-6 bottom-24 z-[10055]">
+        <div className="glass-card border border-red-500/30 p-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
+          <div className="text-center">
+            <div className="text-[10px] font-black text-red-500 tracking-[0.4em] mb-2">
+              BGM
+            </div>
+            <iframe
+              title="home-bgm"
+              frameBorder="no"
+              border="0"
+              marginWidth="0"
+              marginHeight="0"
+              width="330"
+              height="86"
+              src="//music.163.com/outchain/player?type=2&id=454231893&auto=1&height=66"
+            ></iframe>
+          </div>
+        </div>
+      </div>
+
       <footer className="p5r-footer p5r-footer-official border-t-0 py-10">
         <div className="p5r-wrapper max-w-[900px]">
           <nav
