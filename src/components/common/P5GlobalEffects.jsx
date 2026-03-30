@@ -155,7 +155,7 @@ const P5GlobalEffects = () => {
         >
           <div className="p5-click-ring" />
           <div className="p5-click-slash-mini" />
-          <span className="p5-click-crit">Week!</span>
+          <span className="p5-click-crit">WEAK!</span>
         </div>
       ))}
     </div>
