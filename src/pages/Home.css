@@ -110,6 +110,13 @@
     rgba(5, 5, 8, 0.6);
 }
 
+/* 首页头图滚动视差（由 JS 写入 transform） */
+.p5-hero-parallax-layer {
+  will-change: transform;
+  transform-origin: 50% 0;
+  backface-visibility: hidden;
+}
+
 .p5r-bg-stars {
   position: absolute;
   inset: 0;
@@ -1182,6 +1189,128 @@
       transform: translateX(18%) translateY(0);
       opacity: 0;
     }
+  }
+}
+
+/* ========== 首页主标题：打字机 + 第二行左右飞入 ========== */
+.p5-home-redesign .p5-hero-typewriter-line {
+  display: block;
+  min-height: 1.15em;
+}
+
+.p5-home-redesign .p5-hero-typewriter-text {
+  text-shadow:
+    3px 3px 0 #000,
+    -1px -1px 0 rgba(220, 38, 38, 0.4);
+}
+
+.p5-home-redesign .p5-hero-typewriter-caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.85em;
+  margin-left: 0.06em;
+  vertical-align: -0.05em;
+  background: #fecaca;
+  box-shadow: 0 0 12px rgba(248, 113, 113, 0.85);
+  animation: p5-hero-caret-blink 0.85s step-end infinite;
+}
+
+@keyframes p5-hero-caret-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.p5-home-redesign .p5-hero__line2-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.12em;
+  margin-top: 0.1rem;
+}
+
+@media (min-width: 1024px) {
+  .p5-home-redesign .p5-hero__line2-wrap {
+    justify-content: flex-start;
+  }
+}
+
+.p5-home-redesign .p5-hero__line2-part {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateX(0);
+}
+
+.p5-home-redesign .p5-hero__line2-wrap--ready .p5-hero__line2-part--left {
+  animation: p5-hero-from-left 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.p5-home-redesign .p5-hero__line2-wrap--ready .p5-hero__line2-part--right {
+  animation: p5-hero-from-right 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+@keyframes p5-hero-from-left {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateX(-3.5rem) skewX(-6deg);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0) skewX(0deg);
+  }
+}
+
+@keyframes p5-hero-from-right {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateX(3.5rem) skewX(6deg);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0) skewX(0deg);
+  }
+}
+
+.p5-home-redesign .p5-hero__calling-wrap {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: p5-hero-calling-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1.15s forwards;
+}
+
+@keyframes p5-hero-calling-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p5-home-redesign .p5-hero-typewriter-caret {
+    animation: none;
+    opacity: 0;
+  }
+
+  .p5-home-redesign .p5-hero__line2-part {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    animation: none !important;
+  }
+
+  .p5-home-redesign .p5-hero__calling-wrap {
+    opacity: 1;
+    transform: none;
+    animation: none;
   }
 }
 

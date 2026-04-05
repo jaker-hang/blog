@@ -13,6 +13,7 @@ import MusicPlayer from "./pages/Music";
 import Travel from "./pages/Travel";
 import NotFound from "./pages/NotFound";
 import P5GlobalEffects from "./components/common/P5GlobalEffects";
+import P5Atmosphere from "./components/common/P5Atmosphere";
 
 function FullScreenWrapper({ children }) {
   const location = useLocation();
@@ -99,6 +100,7 @@ function AppWithRouteSplash() {
   return (
     <>
       {splashId > 0 ? <P5SplashLoader key={splashId} /> : null}
+      <P5Atmosphere />
       <P5GlobalEffects />
       <FullScreenWrapper>
         <Routes>

@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Heart, Share2, List, X, Repeat, Shuffle } from 'react-feather';
+import ScrollReveal from '../components/common/ScrollReveal';
+import P5InnerDepthBand from '../components/common/P5InnerDepthBand';
+import TiltSurface from '../components/common/TiltSurface';
 
 // 同一个 HTMLMediaElement 只能创建一次 MediaElementSourceNode（避免重复创建报错）
 const mediaSourceRegistry = new WeakMap();
@@ -595,8 +598,10 @@ const MusicPlayer = () => {
   }, [isPlaying]);
 
   return (
-    <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen relative overflow-x-hidden">
+      <P5InnerDepthBand label="SOUND" />
+      <ScrollReveal variant="scale" className="max-w-7xl mx-auto px-4 py-8 relative z-[1]">
+        <TiltSurface className="block" maxTilt={4.5}>
         <div className="relative rounded-2xl overflow-hidden border border-red-500/40 bg-[#0f0f14]/85 shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
           <div className="absolute inset-0 pointer-events-none opacity-20" style={{
             backgroundImage: "linear-gradient(135deg, rgba(255,255,255,0.25) 1px, transparent 1px), linear-gradient(45deg, rgba(232,30,45,0.3) 1px, transparent 1px)",
@@ -852,6 +857,8 @@ const MusicPlayer = () => {
             </div>
           </div>
         </div>
+        </TiltSurface>
+      </ScrollReveal>
 
         {showPlaylist && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50" onClick={() => setShowPlaylist(false)}>
@@ -888,7 +895,6 @@ const MusicPlayer = () => {
             </div>
           </div>
         )}
-      </div>
 
       {/* 隐藏的audio元素 */}
       <audio 

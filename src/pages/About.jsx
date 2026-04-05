@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import { author } from "../utils/data";
 import SubscribeForm from "../components/common/SubscribeForm";
+import ScrollReveal from "../components/common/ScrollReveal";
+import P5InnerDepthBand from "../components/common/P5InnerDepthBand";
+import TiltSurface from "../components/common/TiltSurface";
 import {
   Code,
   Coffee,
@@ -94,11 +97,12 @@ const About = () => {
   };
 
   return (
-    <div className="min-h-screen">
-
+    <div className="min-h-screen relative overflow-x-hidden">
+      <P5InnerDepthBand label="ABOUT" />
+      <TiltSurface className="relative z-[1]" maxTilt={3.2}>
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         {/* Header 区域 - 开发者名片风格 */}
-        <div className="text-center mb-16">
+        <ScrollReveal variant="up" className="text-center mb-16">
           <div className="relative inline-block mb-6">
             <img
               src={author.avatar}
@@ -165,10 +169,10 @@ const About = () => {
           <p className="max-w-xl mx-auto text-slate-600 leading-relaxed bg-white/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-100">
             {personalInfo.bio}
           </p>
-        </div>
+        </ScrollReveal>
 
         {/* 数据卡片 - 极简风格 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+        <ScrollReveal variant="scale" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
           {personalInfo.stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -186,10 +190,10 @@ const About = () => {
               </div>
             );
           })}
-        </div>
+        </ScrollReveal>
 
         {/* 技术栈区域 */}
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
+        <ScrollReveal variant="up" className="grid md:grid-cols-2 gap-8 mb-16">
           {/* 技能进度条 */}
           <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
@@ -280,10 +284,10 @@ const About = () => {
               </div>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* 底部 - 文章分类和订阅 */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <ScrollReveal variant="up" delayMs={80} className="grid md:grid-cols-3 gap-8">
           {/* 文章分类 */}
           <div className="md:col-span-2 bg-white rounded-2xl p-6 md:p-8 border border-slate-100 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
@@ -330,10 +334,10 @@ const About = () => {
               {"// 随时可以取消，不会 spam"}
             </p>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* 底部签名 - 代码注释风格 */}
-        <div className="text-center mt-16">
+        <ScrollReveal variant="up" className="text-center mt-16">
           <p className="text-xs font-mono text-slate-300">
             {`/* ${new Date().getFullYear()} · 用代码和文字记录思考 */`}
           </p>
@@ -341,8 +345,9 @@ const About = () => {
             <Heart className="w-3 h-3 text-pink-300" />
             <span>Built with React</span>
           </p>
-        </div>
+        </ScrollReveal>
       </div>
+      </TiltSurface>
     </div>
   );
 };

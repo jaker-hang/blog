@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from "react";
+import ScrollReveal from "../components/common/ScrollReveal";
+import P5InnerDepthBand from "../components/common/P5InnerDepthBand";
+import P5DragPhotoRail from "../components/common/P5DragPhotoRail";
+import TiltSurface from "../components/common/TiltSurface";
 import {
   MapPin,
   Heart,
@@ -419,8 +423,9 @@ const growthMoments = [
       )}
 
       {/* 时间线主体部分 - 保持不变，但注意卡片点击传递的moment包含images数组 */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-6xl">
+      <section className="py-20 relative overflow-x-hidden">
+        <P5InnerDepthBand label="PHOTO" />
+        <div className="container mx-auto px-4 max-w-6xl relative z-[1]">
           {slashBurst && (
             <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
               <div className="absolute -left-24 top-1/2 w-64 h-3 bg-red-500/70 skew-x-[-30deg] animate-global-slash"></div>
@@ -429,17 +434,24 @@ const growthMoments = [
             </div>
           )}
           {/* 头部 */}
-          <div className="text-center mb-16">
+          <ScrollReveal variant="up" className="text-center mb-16">
             <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-red-400 to-red-700 bg-clip-text text-transparent tracking-wide">
               成长时间线
             </h1>
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
               每一张照片都是一个故事，每一个故事都是一次成长
             </p>
-          </div>
+          </ScrollReveal>
+
+          <ScrollReveal variant="up" className="mb-12">
+            <P5DragPhotoRail
+              moments={filteredMoments}
+              onPickMoment={openMomentModal}
+            />
+          </ScrollReveal>
 
           {/* 分类筛选 - 与之前相同 */}
-          <div className="flex flex-wrap justify-center gap-3 mb-16">
+          <ScrollReveal variant="scale" className="flex flex-wrap justify-center gap-3 mb-16">
             {/* ... 按钮代码保持不变 ... */}
             <button
               className={`px-6 py-2 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
@@ -501,7 +513,7 @@ const growthMoments = [
             >
               成就
             </button>
-          </div>
+          </ScrollReveal>
 
           {/* 时间线 - 卡片部分需要修改图片显示 */}
           <div className="relative">
@@ -520,6 +532,12 @@ const growthMoments = [
                   <div
                     className={`w-full md:w-5/12 ${index % 2 === 0 ? "md:pr-12" : "md:pl-12"}`}
                   >
+                    <ScrollReveal
+                      variant={index % 2 === 0 ? "left" : "right"}
+                      delayMs={Math.min(index * 55, 480)}
+                      className="h-full"
+                    >
+                    <TiltSurface className="h-full block" maxTilt={3.5}>
                     <div
                       className={`bg-[#111116]/95 border border-red-500/35 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-500 hover:scale-[1.02] hover:shadow-[0_10px_30px_rgba(0,0,0,0.6)] cursor-pointer ${
                         impactMomentId === moment.id ? "animate-card-impact" : ""
@@ -580,6 +598,8 @@ const growthMoments = [
                         </div>
                       </div>
                     </div>
+                    </TiltSurface>
+                    </ScrollReveal>
                   </div>
 
                   <div className="hidden md:block md:w-5/12"></div>

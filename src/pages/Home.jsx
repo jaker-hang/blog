@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import P5Img from "../components/common/P5Img";
 import P5CharacterArchive from "../components/common/P5CharacterArchive";
 import P5TarotCarousel from "../components/common/P5TarotCarousel";
 import P5MapBackground from "../components/common/P5MapBackground";
 import P5CallingCard from "../components/common/P5CallingCard";
+import P5HeroAnimatedTitle from "../components/common/P5HeroAnimatedTitle";
+import P5SiteHub from "../components/common/P5SiteHub";
+import P5KineticMarquee from "../components/common/P5KineticMarquee";
+import P5GalleryFilmstrip from "../components/common/P5GalleryFilmstrip";
 import useScrollReveal from "../hooks/useScrollReveal";
 import {
-  P5,
   newsItems,
   carouselSlides,
   galleryCaptions,
-  specLines,
-  img,
 } from "../data/p5rHomeData";
 import "./Home.css";
 
@@ -25,12 +26,31 @@ const Home = () => {
   const [tarotRef, tarotVisible] = useScrollReveal();
   const [charRef, charVisible] = useScrollReveal();
   const [galleryRef, galleryVisible] = useScrollReveal();
+  const [hubRef, hubVisible] = useScrollReveal();
   const [newsRef, newsVisible] = useScrollReveal();
-  const [studentRef, studentVisible] = useScrollReveal();
+  const heroParallaxRef = useRef(null);
 
   useEffect(() => {
     document.documentElement.lang = "zh-CN";
     document.body.style.overflow = "auto";
+  }, []);
+
+  /** 首页头图：随滚动轻微下沉与放大，增强景深感（参考 JIEJOE 类站点的视差层次） */
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return undefined;
+    }
+    const el = heroParallaxRef.current;
+    if (!el) return undefined;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const s = 1 + Math.min(y, 720) * 0.0001;
+      el.style.transform = `translate3d(0, ${y * 0.09}px, 0) scale(${s})`;
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -67,7 +87,10 @@ const Home = () => {
         <section className="p5-hero p5r-first-view relative pb-10 md:pb-14 overflow-hidden">
           {/* 装饰背景：绝对定位，不参与文档流占位 */}
           <div className="p5-hero-bg" aria-hidden>
-            <div className="p5r-kv-bg absolute inset-0 overflow-hidden">
+            <div
+              ref={heroParallaxRef}
+              className="p5r-kv-bg p5-hero-parallax-layer absolute inset-0 overflow-hidden"
+            >
               <div className="p5r-bg-stars pointer-events-none absolute inset-0" />
               <div className="p5r-kv-p5fx pointer-events-none absolute inset-0" />
               <div className="p5r-bg-top pointer-events-none absolute left-0 right-0 top-0 z-[2]" />
@@ -75,17 +98,16 @@ const Home = () => {
           </div>
           <div className="p5r-wrapper relative z-10">
             <div className="p5-hero__titleblock">
-              <h1 className="p5-hero__h1">
-                <span className="p5-hero__h1-line">夺取吧，</span>
-                <span className="p5-hero__h1-line p5-hero__h1-line--accent">
-                  以那份意志。
-                </span>
-              </h1>
-              {/* 预告信：放在标题模块下方，更自然贴合首屏 */}
-              <P5CallingCard variant="hero" ariaHidden label="" />
+              <P5HeroAnimatedTitle />
+              {/* 预告信：打字/标题动效后再入场 */}
+              <div className="p5-hero__calling-wrap">
+                <P5CallingCard variant="hero" ariaHidden label="" />
+              </div>
             </div>
           </div>
         </section>
+
+        <P5KineticMarquee />
 
         {/* —— 塔罗牌：阿尔卡那轮播（点击翻转） —— */}
         <section
@@ -137,6 +159,12 @@ const Home = () => {
 
             {galleryVisible ? (
               <div className="p5-gallery">
+                <P5GalleryFilmstrip
+                  slides={carouselSlides}
+                  activeIndex={carouselIdx}
+                  onSelect={setCarouselIdx}
+                  captions={galleryCaptions}
+                />
                 {/* 官网风：三图横排 + z/y 夹在左|中、中|右 接缝处（大屏）；小屏单图 + 两侧箭头 */}
                 <div className="p5-gallery__stage">
                   <div
@@ -256,6 +284,8 @@ const Home = () => {
             ) : null}
           </div>
         </section>
+
+        <P5SiteHub ref={hubRef} visible={hubVisible} />
 
         {/* —— 简讯 —— */}
         <section

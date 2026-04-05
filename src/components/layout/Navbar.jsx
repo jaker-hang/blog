@@ -1,4 +1,4 @@
-import { useState, Fragment } from "react";
+import { useState, Fragment, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const mainFrames = [
@@ -17,6 +17,66 @@ const Navbar = ({
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navRootRef = useRef(null);
+
+  /** 桌面导航：指针靠近时格框轻微磁吸（参考 JIEJOE 类站点的跟手反馈） */
+  useEffect(() => {
+    if (isLovePage || typeof window === "undefined") return undefined;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return undefined;
+    }
+    const nav = navRootRef.current;
+    if (!nav) return undefined;
+    const mqLg = window.matchMedia("(min-width: 1024px)");
+    let lg = mqLg.matches;
+
+    const frames = () =>
+      Array.from(nav.querySelectorAll("a.p5-nav-frame[data-magnetic]"));
+
+    const clear = () => {
+      frames().forEach((el) => {
+        el.style.removeProperty("--p5-mx");
+        el.style.removeProperty("--p5-my");
+      });
+    };
+
+    const onMove = (e) => {
+      if (!lg) return;
+      frames().forEach((el) => {
+        const r = el.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const maxR = 110;
+        const dist = Math.hypot(e.clientX - cx, e.clientY - cy);
+        if (dist > maxR) {
+          el.style.setProperty("--p5-mx", "0px");
+          el.style.setProperty("--p5-my", "0px");
+          return;
+        }
+        const t = 1 - dist / maxR;
+        const dx = ((e.clientX - cx) / Math.max(r.width / 2, 1)) * 9 * t;
+        const dy = ((e.clientY - cy) / Math.max(r.height / 2, 1)) * 7 * t;
+        el.style.setProperty("--p5-mx", `${dx}px`);
+        el.style.setProperty("--p5-my", `${dy}px`);
+      });
+    };
+
+    const onLeave = () => clear();
+    const onMq = () => {
+      lg = mqLg.matches;
+      if (!lg) clear();
+    };
+
+    nav.addEventListener("pointermove", onMove);
+    nav.addEventListener("pointerleave", onLeave);
+    mqLg.addEventListener("change", onMq);
+    return () => {
+      nav.removeEventListener("pointermove", onMove);
+      nav.removeEventListener("pointerleave", onLeave);
+      mqLg.removeEventListener("change", onMq);
+      clear();
+    };
+  }, [isLovePage]);
 
   const handleNavClick = (path) => {
     if (path === "/lovePage") return;
@@ -42,6 +102,7 @@ const Navbar = ({
 
   return (
     <nav
+      ref={navRootRef}
       className={`p5-nav-shell fixed top-0 left-0 right-0 z-[10070] transition-all duration-300 ${shellClass}`}
     >
       {!transparent && (
@@ -77,6 +138,7 @@ const Navbar = ({
                   to={item.path}
                   onClick={() => handleNavClick(item.path)}
                   className="p5-nav-frame shrink-0"
+                  data-magnetic="true"
                 >
                   <span className="p5-nav-frame-inner">
                     <span className="p5-nav-frame-ja block whitespace-nowrap">
@@ -120,6 +182,7 @@ const Navbar = ({
                   setIsMenuOpen(false);
                 }}
                 className="p5-nav-frame w-full"
+                data-magnetic="true"
               >
                 <span className="p5-nav-frame-inner">
                   <span className="p5-nav-frame-ja">{item.ja}</span>

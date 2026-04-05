@@ -190,6 +190,7 @@ const P5GlobalEffects = () => {
           className="p5-click-hit"
           style={{ left: c.x, top: c.y }}
         >
+          <div className="p5-click-ripple" />
           <div className="p5-click-ring" />
           <div className="p5-click-slash-mini" />
           <span className="p5-click-crit">WEAK!</span>

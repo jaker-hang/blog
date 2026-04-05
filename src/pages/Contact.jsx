@@ -8,6 +8,9 @@ import {
   CheckCircle,
   AlertCircle,
 } from "react-feather";
+import ScrollReveal from "../components/common/ScrollReveal";
+import P5InnerDepthBand from "../components/common/P5InnerDepthBand";
+import TiltSurface from "../components/common/TiltSurface";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -72,9 +75,11 @@ const Contact = () => {
 
   return (
     <div
-      className="min-h-screen py-16 overflow-x-hidden"
+      className="min-h-screen py-16 overflow-x-hidden relative"
       style={{ minHeight: "100vh" }}
     >
+      <P5InnerDepthBand label="LINK" />
+      <TiltSurface className="relative z-[1]" maxTilt={3.5}>
       {/* 装饰性元素 - 小清新点缀 */}
       <div className="absolute top-20 left-10 w-64 h-64 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
       <div className="absolute top-40 right-10 w-72 h-72 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -82,7 +87,7 @@ const Contact = () => {
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
         {/* 头部区域 */}
-        <div className="text-center mb-16">
+        <ScrollReveal variant="up" className="text-center mb-16">
           <div className="inline-block mb-4">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto shadow-sm">
               <Mail className="w-8 h-8 text-green-500" />
@@ -95,11 +100,11 @@ const Contact = () => {
             有任何问题、建议或合作意向？我都很乐意听到你的声音
           </p>
           <div className="w-16 h-px bg-green-200 mx-auto mt-6"></div>
-        </div>
+        </ScrollReveal>
 
         <div className="grid lg:grid-cols-2 gap-10">
           {/* 联系信息 - 小清新卡片 */}
-          <div className="bg-white rounded-3xl shadow-sm p-8 border border-green-100 transform hover:shadow-md transition-all duration-300 overflow-visible">
+          <ScrollReveal variant="left" className="bg-white rounded-3xl shadow-sm p-8 border border-green-100 transform hover:shadow-md transition-all duration-300 overflow-visible">
             <h2 className="text-2xl font-light text-gray-800 mb-6 flex items-center">
               <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                 <span className="text-green-500 text-sm">✨</span>
@@ -170,10 +175,10 @@ const Contact = () => {
             <div className="mt-6 text-xs text-gray-300 text-center">
               ✦ 期待与你相遇 ✦
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* 联系表单 - 小清新卡片 */}
-          <div className="bg-white rounded-3xl shadow-sm p-8 border border-green-100 transform hover:shadow-md transition-all duration-300 overflow-visible">
+          <ScrollReveal variant="right" className="bg-white rounded-3xl shadow-sm p-8 border border-green-100 transform hover:shadow-md transition-all duration-300 overflow-visible">
             <h2 className="text-2xl font-light text-gray-800 mb-6 flex items-center">
               <span className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                 <Send className="w-4 h-4 text-green-500" />
@@ -313,16 +318,17 @@ const Contact = () => {
             <p className="text-xs text-gray-300 text-center mt-4">
               我会认真阅读每一封来信 🌱
             </p>
-          </div>
+          </ScrollReveal>
         </div>
 
         {/* 底部装饰 */}
-        <div className="text-center mt-16 text-gray-300 text-sm">
+        <ScrollReveal variant="up" delayMs={100} className="text-center mt-16 text-gray-300 text-sm">
           <span className="inline-block w-8 h-px bg-green-200 mx-auto mb-3"></span>
           <p className="font-light">期待与你相遇</p>
           <p className="text-xs mt-1">© 2025 · 保持联系</p>
-        </div>
+        </ScrollReveal>
       </div>
+      </TiltSurface>
 
       {/* 动画样式 */}
       <style jsx>{`
