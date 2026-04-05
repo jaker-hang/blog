@@ -47,6 +47,7 @@ body {
   min-height: 100vh;
   color: var(--text-primary);
   line-height: 1.6;
+  cursor: url("./assets/mouse.png") 0 0, auto;
 }
 
 html {
@@ -56,6 +57,11 @@ html {
 
 #root {
   min-height: 100vh;
+}
+
+/* 覆盖 Tailwind `cursor-pointer`，避免盖掉 body 上的自定义光标 */
+#root .cursor-pointer {
+  cursor: url("./assets/mouse.png") 0 0, pointer !important;
 }
 
 ::selection {
@@ -192,13 +198,9 @@ html {
 }
 
 /* Persona 5 style theme for non-love pages */
-/* P5 风光标：白手套式指针（data URI，热点约指尖） */
 .p5-theme {
   color: #ffffff;
-  cursor:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath fill='%23ffffff' stroke='%23000000' stroke-width='1.2' d='M10 26 L10 14 L12 11 L15 9 L18 11 L19 14 L19 18 L21 16 L24 16 L24 24 L22 26 Z'/%3E%3Cpath fill='none' stroke='%23e81e2d' stroke-width='1' d='M11 25 L23 25'/%3E%3C/svg%3E")
-      4 4,
-    auto;
+  cursor: url("./assets/mouse.png") 0 0, auto;
 }
 
 .p5-theme a,
@@ -207,10 +209,21 @@ html {
 .p5-theme input,
 .p5-theme textarea,
 .p5-theme select {
-  cursor:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath fill='%23ffffff' stroke='%23000000' stroke-width='1.2' d='M10 26 L10 14 L12 11 L15 9 L18 11 L19 14 L19 18 L21 16 L24 16 L24 24 L22 26 Z'/%3E%3Cpath fill='none' stroke='%23e81e2d' stroke-width='1' d='M11 25 L23 25'/%3E%3C/svg%3E")
-      4 4,
-    pointer;
+  cursor: url("./assets/mouse.png") 0 0, pointer;
+}
+
+/* 按下鼠标时切换为点击态光标（由 JS 在 html 上加类名） */
+html.custom-cursor-pressing,
+html.custom-cursor-pressing * {
+  cursor: url("./assets/click.png") 0 0, auto !important;
+}
+
+html.custom-cursor-pressing input,
+html.custom-cursor-pressing textarea,
+html.custom-cursor-pressing select,
+html.custom-cursor-pressing option,
+html.custom-cursor-pressing [contenteditable="true"] {
+  cursor: text !important;
 }
 
 .p5-theme .glass-card {

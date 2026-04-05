@@ -77,6 +77,43 @@ const P5GlobalEffects = () => {
     }
   }, [location.pathname]);
 
+  /** 全局自定义光标：按下时显示 click.png（与 CRIT 特效排除规则一致） */
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+
+    const CURSOR_CLASS = "custom-cursor-pressing";
+
+    const shouldSkipTarget = (target) => {
+      if (!target || typeof target.closest !== "function") return false;
+      return !!target.closest(
+        'input, textarea, select, option, [contenteditable="true"], [data-p5-no-click-fx="true"]',
+      );
+    };
+
+    const onPointerDown = (e) => {
+      if (e.button != null && e.button !== 0) return;
+      if (shouldSkipTarget(e.target)) return;
+      document.documentElement.classList.add(CURSOR_CLASS);
+    };
+
+    const clearPressing = () => {
+      document.documentElement.classList.remove(CURSOR_CLASS);
+    };
+
+    window.addEventListener("pointerdown", onPointerDown, { capture: true });
+    window.addEventListener("pointerup", clearPressing, { capture: true });
+    window.addEventListener("pointercancel", clearPressing, { capture: true });
+    window.addEventListener("blur", clearPressing);
+
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown, { capture: true });
+      window.removeEventListener("pointerup", clearPressing, { capture: true });
+      window.removeEventListener("pointercancel", clearPressing, { capture: true });
+      window.removeEventListener("blur", clearPressing);
+      document.documentElement.classList.remove(CURSOR_CLASS);
+    };
+  }, []);
+
   /** 鼠标点击落点 CRIT */
   useEffect(() => {
     if (typeof window === "undefined") return;

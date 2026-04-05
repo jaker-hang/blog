@@ -1,11 +1,21 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import P5Img from "./P5Img";
 import { tarotCards, TAROT_CARD_BACK } from "../../data/tarotCardsData";
 import "./P5TarotCarousel.css";
 
-const CARDS_PER_PAGE = 6;
+/** 与 CSS --card-w 同量级，用于计算环半径 */
+const RING_CARD_WIDTH = 84;
+/** 大于 1 时环半径变大，牌与牌之间空隙更大 */
+const RING_RADIUS_FACTOR = 1.32;
+const AUTOPLAY_INTERVAL_MS = 4200;
 
-function TarotFlipCard({ card, backPath, revealed, index }) {
+function TarotFlipCard({ card, backPath, revealed, index, ring }) {
   const [flipped, setFlipped] = useState(false);
 
   const handleFlip = useCallback(() => {
@@ -16,10 +26,10 @@ function TarotFlipCard({ card, backPath, revealed, index }) {
     <article
       role="button"
       tabIndex={0}
-      className={`p5-tarot-flip-card ${
+      className={`p5-tarot-flip-card ${ring ? "p5-tarot-flip-card--ring" : ""} ${
         flipped ? "p5-tarot-flip-card--flipped" : ""
       } ${revealed ? "p5-tarot-flip-card--revealed" : ""}`}
-      style={{ "--flip-delay": `${index * 40}ms` }}
+      style={{ "--flip-delay": `${index * 35}ms` }}
       onClick={handleFlip}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -30,7 +40,6 @@ function TarotFlipCard({ card, backPath, revealed, index }) {
       aria-label={`${card.arcana}：点击翻转`}
     >
       <div className="p5-tarot-flip-card__inner">
-        {/* 初始：展示卡面；翻转后：展示卡背（反个面） */}
         <div className="p5-tarot-flip-card__face p5-tarot-flip-card__face--back">
           <P5Img
             path={card.face}
@@ -54,19 +63,31 @@ function TarotFlipCard({ card, backPath, revealed, index }) {
   );
 }
 
+function normalizeDeg(deg) {
+  let d = deg % 360;
+  if (d > 180) d -= 360;
+  if (d <= -180) d += 360;
+  return d;
+}
+
 export default function P5TarotCarousel({ scrollRevealed = false }) {
+  const n = tarotCards.length;
+  const step = 360 / n;
+
   const reduceMotion = useMemo(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 
-  const totalPages = useMemo(
-    () => Math.ceil(tarotCards.length / CARDS_PER_PAGE),
-    [],
-  );
+  const translateZ = useMemo(() => {
+    const w = RING_CARD_WIDTH;
+    const base = (w / 2) / Math.sin(Math.PI / n);
+    return Math.max(200, Math.round(base * RING_RADIUS_FACTOR));
+  }, [n]);
 
-  const [page, setPage] = useState(0);
+  const [rotation, setRotation] = useState(0);
   const [localRevealed, setLocalRevealed] = useState(false);
+  const autoplayPausedRef = useRef(false);
 
   useEffect(() => {
     if (!scrollRevealed) return;
@@ -77,71 +98,172 @@ export default function P5TarotCarousel({ scrollRevealed = false }) {
     setLocalRevealed(false);
     const t = requestAnimationFrame(() => setLocalRevealed(true));
     return () => cancelAnimationFrame(t);
-  }, [scrollRevealed, page, reduceMotion]);
+  }, [scrollRevealed, reduceMotion]);
 
-  const startIdx = page * CARDS_PER_PAGE;
-  const visibleCards = tarotCards.slice(
-    startIdx,
-    startIdx + CARDS_PER_PAGE,
+  useEffect(() => {
+    if (!scrollRevealed || reduceMotion) return undefined;
+    const id = window.setInterval(() => {
+      if (!autoplayPausedRef.current) {
+        setRotation((r) => r - step);
+      }
+    }, AUTOPLAY_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [scrollRevealed, reduceMotion, step]);
+
+  const goPrev = () =>
+    setRotation((r) => (reduceMotion ? r : r + step));
+  const goNext = () =>
+    setRotation((r) => (reduceMotion ? r : r - step));
+
+  const frontIndex =
+    ((Math.round(-rotation / step) % n) + n) % n;
+
+  const cellOpacity = useCallback(
+    (i) => {
+      if (reduceMotion) return 1;
+      const ang = normalizeDeg(i * step + rotation);
+      const t = (Math.cos((ang * Math.PI) / 180) + 1) / 2;
+      return 0.32 + 0.68 * t;
+    },
+    [rotation, step, reduceMotion],
   );
 
-  const goPrev = () => setPage((p) => (p - 1 + totalPages) % totalPages);
-  const goNext = () => setPage((p) => (p + 1) % totalPages);
+  const cellScale = useCallback(
+    (i) => {
+      if (reduceMotion) return 1;
+      const ang = normalizeDeg(i * step + rotation);
+      const t = (Math.cos((ang * Math.PI) / 180) + 1) / 2;
+      return 0.82 + 0.18 * t;
+    },
+    [rotation, step, reduceMotion],
+  );
+
+  if (reduceMotion) {
+    const slice = tarotCards.slice(0, 6);
+    return (
+      <div className="p5-tarot-carousel p5-tarot-carousel--flat">
+        <div className="p5-tarot-carousel__track p5-tarot-carousel__track--flat">
+          {slice.map((card, idx) => (
+            <TarotFlipCard
+              key={card.id}
+              card={card}
+              backPath={TAROT_CARD_BACK}
+              revealed={localRevealed}
+              index={idx}
+              ring={false}
+            />
+          ))}
+        </div>
+        <p className="p5-tarot-carousel__reduce-hint">
+          已开启减少动态效果，塔罗环以平面网格展示。
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="p5-tarot-carousel">
-      <button
-        type="button"
-        className="p5-tarot-carousel__arrow p5-tarot-carousel__arrow--prev"
-        onClick={goPrev}
-        aria-label="上一页"
-      >
-        <P5Img
-          path="/resources/img/sp/top/z.png"
-          alt=""
-          className="p5-gallery__arrow-png"
-          draggable={false}
-          loading="eager"
-        />
-      </button>
-
-      <div className="p5-tarot-carousel__track">
-        {visibleCards.map((card, idx) => (
-          <TarotFlipCard
-            key={card.id}
-            card={card}
-            backPath={TAROT_CARD_BACK}
-            revealed={localRevealed}
-            index={idx}
+    <div
+      className="p5-tarot-carousel"
+      onMouseEnter={() => {
+        autoplayPausedRef.current = true;
+      }}
+      onMouseLeave={() => {
+        autoplayPausedRef.current = false;
+      }}
+      onFocusCapture={() => {
+        autoplayPausedRef.current = true;
+      }}
+      onBlurCapture={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+          autoplayPausedRef.current = false;
+        }
+      }}
+    >
+      <div className="p5-tarot-carousel__stage-row">
+        <button
+          type="button"
+          className="p5-tarot-carousel__arrow p5-tarot-carousel__arrow--prev"
+          onClick={goPrev}
+          aria-label="逆时针转动塔罗环"
+        >
+          <P5Img
+            path="/resources/img/sp/top/z.png"
+            alt=""
+            className="p5-gallery__arrow-png p5-tarot-carousel__arrow-img"
+            draggable={false}
+            loading="eager"
           />
-        ))}
+        </button>
+
+        <div
+          className="p5-tarot-3d-stage"
+          style={{ "--tarot-tz": `${translateZ}px` }}
+        >
+          <div
+            className="p5-tarot-3d-ring"
+            style={{
+              transform: `rotateY(${rotation}deg)`,
+            }}
+          >
+            {tarotCards.map((card, i) => {
+              const op = cellOpacity(i);
+              return (
+                <div
+                  key={card.id}
+                  className="p5-tarot-3d-cell"
+                  style={{
+                    transform: `rotateY(${i * step}deg) translateZ(var(--tarot-tz)) scale(${cellScale(i)})`,
+                    opacity: op,
+                    pointerEvents: op < 0.48 ? "none" : "auto",
+                    zIndex: Math.round(op * 100),
+                  }}
+                >
+                  <TarotFlipCard
+                    card={card}
+                    backPath={TAROT_CARD_BACK}
+                    revealed={localRevealed}
+                    index={i}
+                    ring
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className="p5-tarot-carousel__arrow p5-tarot-carousel__arrow--next"
+          onClick={goNext}
+          aria-label="顺时针转动塔罗环"
+        >
+          <P5Img
+            path="/resources/img/sp/top/y.png"
+            alt=""
+            className="p5-gallery__arrow-png p5-tarot-carousel__arrow-img"
+            draggable={false}
+            loading="eager"
+          />
+        </button>
       </div>
 
-      <button
-        type="button"
-        className="p5-tarot-carousel__arrow p5-tarot-carousel__arrow--next"
-        onClick={goNext}
-        aria-label="下一页"
-      >
-        <P5Img
-          path="/resources/img/sp/top/y.png"
-          alt=""
-          className="p5-gallery__arrow-png"
-          draggable={false}
-          loading="eager"
-        />
-      </button>
-
-      <div className="p5-tarot-carousel__dots">
-        {Array.from({ length: totalPages }).map((_, i) => (
+      <div className="p5-tarot-carousel__dots" role="tablist" aria-label="塔罗牌位置">
+        {tarotCards.map((c, i) => (
           <button
-            key={i}
+            key={c.id}
             type="button"
-            aria-label={`第 ${i + 1} 页`}
-            aria-current={i === page ? "true" : undefined}
-            onClick={() => setPage(i)}
+            role="tab"
+            aria-selected={i === frontIndex}
+            aria-label={`${c.arcana}${i === frontIndex ? "（当前在前方）" : ""}`}
+            onClick={() => {
+              const ideal = -i * step;
+              setRotation((cur) => {
+                const k = Math.round((cur - ideal) / 360);
+                return ideal + k * 360;
+              });
+            }}
             className={`p5-tarot-carousel__dot ${
-              i === page ? "p5-tarot-carousel__dot--active" : ""
+              i === frontIndex ? "p5-tarot-carousel__dot--active" : ""
             }`}
           />
         ))}
